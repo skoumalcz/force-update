@@ -1,0 +1,67 @@
+apply plugin: 'com.android.library'
+
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'force-update'
+
+    publishedGroupId = 'net.skoumal.forceupdate'
+    libraryName = 'ForceUpdate'
+    artifact = 'force-update'
+
+    libraryDescription = 'Force your users to update the app, or notify about non-critical updates.'
+
+    siteUrl = 'https://github.com/skoumalcz/fragment-back'
+    gitUrl = 'https://github.com/skoumalcz/fragment-back.git'
+
+    libraryVersion = '0.1.0'
+    libraryVersionCode = 100
+
+    developerId = 'skoumal'
+    developerName = 'SKOUMAL, s.r.o.'
+    developerEmail = 'skoumal@skoumal.net'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 23
+        versionCode libraryVersionCode
+        versionName libraryVersion
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:1.10.19'
+    androidTestCompile 'com.android.support:support-annotations:23.0.0'
+    androidTestCompile 'com.android.support.test:runner:0.5'
+    androidTestCompile 'com.android.support.test:rules:0.5'
+}
+
+apply from: 'install.gradle'
+apply from: 'bintray.gradle'
+
+/*
+    How to deploy to jcenter
+
+    ./gradlew install
+
+    ./gradlew bintrayUpload
+
+    For more details please refer to http://inthecheesefactory.com/blog/how-to-upload-library-to-jcenter-maven-central-as-dependency/en
+ */

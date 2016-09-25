@@ -49,7 +49,7 @@ To init ForceUpdate library use this simple builder in your Application:
         .forcedVersionCheckMinInterval(4 * 3600)
 
         // defaults to version from http://carreto.pt/tools/android-store-version/?package=<your package>)
-        .recommendedVersionProvider(new CarretoVersionProvider())
+        .recommendedVersionProvider(new GooglePlayVersionProvider())
 
         // defaults to 24 hours
         .recommendedVersionCheckMinInterval(24 * 3600)
@@ -67,12 +67,17 @@ To init ForceUpdate library use this simple builder in your Application:
         .buildAndInit();
 ```
 
+Extras
+------
 
+Library is able to detect crash during last version check and hangs main thread during next app
+start to avoid any other code execution and allow successful version check. If there is new version
+available it fires notification automatically.
 
 License
 =======
 
-    Copyright 2015 SKOUMAL, s.r.o.
+    Copyright 2016 SKOUMAL, s.r.o.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
