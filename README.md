@@ -37,16 +37,34 @@ strategy is to ask with every _Activity.onResume()_ event if _MinInterval_ is al
 To init ForceUpdate library use this simple builder in your Application:
 
 ```java
-    ForceUpdate retrofit = new ForceUpdate.Builder()
-        .application(this) // required - needs android.app.Application object
-        .forcedVersionProvider(new MyCustomVersionProvider()) // defaults to version 0 - no force update view will ever appear
-        .forcedVersionCheckMinInterval(4 * 3600) // defaults to 24 hours)
-        .recommendedVersionProvider(new CarretoVersionProvider()) // defaults to version from http://carreto.pt/tools/android-store-version/?package=<your package>)
-        .recommendedVersionCheckMinInterval(24 * 3600) // defaults to 24 hours)
-        .currentVersionProvider(new ApkVersionProvider()) // defaults to current apk version
-        .forcedUpdateView(new ForcedVersionActivityView()) // defaults to predefined activity
-        .recommendedUpdateView(new RecommendedVersionView()) // defaults to predefined dialog
-        .build();
+    new ForceUpdate.Builder()
+
+        // required - needs android.app.Application object
+        .application(this)
+
+        // defaults to version 0 - no force update view will ever appear
+        .forcedVersionProvider(new MyCustomVersionProvider())
+
+        // defaults to 24 hours
+        .forcedVersionCheckMinInterval(4 * 3600)
+
+        // defaults to version from http://carreto.pt/tools/android-store-version/?package=<your package>)
+        .recommendedVersionProvider(new CarretoVersionProvider())
+
+        // defaults to 24 hours
+        .recommendedVersionCheckMinInterval(24 * 3600)
+
+        // defaults to current apk version
+        .currentVersionProvider(new ApkVersionProvider())
+
+        // defaults to predefined activity
+        .forcedUpdateView(new ForcedVersionActivityView())
+
+        // defaults to predefined dialog
+        .recommendedUpdateView(new RecommendedVersionView())
+
+        // alias for .build().init()
+        .buildAndInit();
 ```
 
 
