@@ -52,7 +52,7 @@ To init ForceUpdate library use this simple builder in your Application:
         .recommendedVersionProvider(new GooglePlayVersionProvider())
 
         // defaults to 24 hours
-        .recommendedVersionCheckMinInterval(24 * 3600)
+        .recommendedVersionCheckMinInterval(6 * 3600)
 
         // defaults to current apk version
         .currentVersionProvider(new ApkVersionProvider())
