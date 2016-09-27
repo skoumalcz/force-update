@@ -43,7 +43,7 @@ public class ForceUpdate {
                        UpdateView gForcedVersionView,
                        UpdateView gRecommendedVersionView) {
 
-        if(alreadyInstantiated) {
+        if (alreadyInstantiated) {
             throw new RuntimeException("ForceUpdate library is already initialized.");
         }
 
@@ -121,26 +121,28 @@ public class ForceUpdate {
 
         sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_REQUEST_INTERRUPTED, true).apply();
 
-        if(lastForcedVersionRequest + (forcedVersionInterval * 1000) < System.currentTimeMillis()) {
+        if (forcedVersionProvider != null &&
+                lastForcedVersionRequest + (forcedVersionInterval * 1000) < System.currentTimeMillis()) {
             forcedVersionProvider.getVersion(new AsyncVersionProvider.VersionProviderResult() {
                 @Override
                 public void version(Version gVersion, String gUpdateMessage) {
                     Version currentVersion = currentVersionProvider.getVersion();
 
-                    if(currentVersion.compareTo(gVersion) < 0) {
+                    if (currentVersion.compareTo(gVersion) < 0) {
                         forcedVersionView.showView(currentVersion, gVersion, gUpdateMessage);
                     }
                 }
             });
         }
 
-        if(lastRecommendedVersionRequest + (recommendedVersionInterval * 1000) < System.currentTimeMillis()) {
+        if (recommendedVersionProvider != null &&
+                lastRecommendedVersionRequest + (recommendedVersionInterval * 1000) < System.currentTimeMillis()) {
             recommendedVersionProvider.getVersion(new AsyncVersionProvider.VersionProviderResult() {
                 @Override
                 public void version(Version gVersion, String gUpdateMessage) {
                     Version currentVersion = currentVersionProvider.getVersion();
 
-                    if(currentVersion.compareTo(gVersion) < 0) {
+                    if (currentVersion.compareTo(gVersion) < 0) {
                         // TODO [1] avoid showing recommended view when force update is available
                         recommendedVersionView.showView(currentVersion, gVersion, gUpdateMessage);
                     }
@@ -148,7 +150,7 @@ public class ForceUpdate {
             });
         }
 
-        if(previousRequestInterrupted) {
+        if (previousRequestInterrupted) {
             // block main thread till the request finishes to avoid crash during request
         }
     }

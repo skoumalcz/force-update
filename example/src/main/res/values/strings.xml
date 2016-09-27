@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ForceUpdate</string>
+    <string name="forced_version_information">Your version is %1$s, please update to %2$s to be able using this app again.</string>
+</resources>
