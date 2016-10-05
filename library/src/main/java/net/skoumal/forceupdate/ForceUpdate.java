@@ -4,7 +4,15 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+
+import net.skoumal.forceupdate.provider.ApkVersionProvider;
+import net.skoumal.forceupdate.provider.CarretoVersionProvider;
+import net.skoumal.forceupdate.view.activity.ForceUpdateActivity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ForceUpdate {
 
@@ -34,17 +42,28 @@ public class ForceUpdate {
 
     private UpdateView recommendedVersionView;
 
+    private List<Class<?>> forceUpdateActivities;
+
     private SharedPreferences sharedPreferences;
+
+    private Activity resumedActivity;
 
     public ForceUpdate(Application gApplication,
                        AsyncVersionProvider gForcedVersionProvider, int gForcedVersionInterval,
                        AsyncVersionProvider gRecommendedVersionProvider, int gRecommendedVersionInterval,
                        VersionProvider gCurrentVersionProvider,
                        UpdateView gForcedVersionView,
-                       UpdateView gRecommendedVersionView) {
+                       UpdateView gRecommendedVersionView,
+                       List<Class<?>> gForceUpdateActivities) {
 
         if(alreadyInstantiated) {
             throw new RuntimeException("ForceUpdate library is already initialized.");
+        }
+
+        String permission = "android.permission.INTERNET";
+        int res = gApplication.checkCallingOrSelfPermission(permission);
+        if(res != PackageManager.PERMISSION_GRANTED) {
+            throw new RuntimeException("Internet permission is necessary for version checks.");
         }
 
         application = gApplication;
@@ -63,7 +82,11 @@ public class ForceUpdate {
 
         recommendedVersionView = gRecommendedVersionView;
 
+        forceUpdateActivities = gForceUpdateActivities;
+
         sharedPreferences = gApplication.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+
+        alreadyInstantiated = true;
     }
 
     public void init() {
@@ -87,7 +110,7 @@ public class ForceUpdate {
 
             @Override
             public void onActivityPaused(Activity activity) {
-
+                ForceUpdate.this.onActivityPaused(activity);
             }
 
             @Override
@@ -107,10 +130,30 @@ public class ForceUpdate {
         });
     }
 
-    private void onActivityResumed(Activity activity) {
-        checkForUpdate();
+    private void onActivityResumed(Activity gActivity) {
 
-        //TODO [1] show force update view again if current version is still lower than forced version
+        boolean isForceUpdateActivity = false;
+
+        //TODO [1] detect infinite loop because of showView -> onActivityResumed loop
+
+        for(Class<?> c : forceUpdateActivities) {
+            if(c.isInstance(gActivity)) {
+                isForceUpdateActivity = true;
+                break;
+            }
+        }
+
+        if(isForceUpdateActivity) {
+            resumedActivity = gActivity;
+
+            checkForUpdate();
+
+            //TODO [1] show force update view again if current version is still lower than forced version
+        }
+    }
+
+    private void onActivityPaused(Activity activity) {
+        resumedActivity = null;
     }
 
     private void checkForUpdate() {
@@ -127,8 +170,8 @@ public class ForceUpdate {
                 public void version(Version gVersion, String gUpdateMessage) {
                     Version currentVersion = currentVersionProvider.getVersion();
 
-                    if(currentVersion.compareTo(gVersion) < 0) {
-                        forcedVersionView.showView(currentVersion, gVersion, gUpdateMessage);
+                    if(currentVersion.compareTo(gVersion) < 0 && resumedActivity != null) {
+                        forcedVersionView.showView(resumedActivity, currentVersion, gVersion, gUpdateMessage);
                     }
                 }
             });
@@ -140,9 +183,9 @@ public class ForceUpdate {
                 public void version(Version gVersion, String gUpdateMessage) {
                     Version currentVersion = currentVersionProvider.getVersion();
 
-                    if(currentVersion.compareTo(gVersion) < 0) {
+                    if(currentVersion.compareTo(gVersion) < 0 && resumedActivity != null) {
                         // TODO [1] avoid showing recommended view when force update is available
-                        recommendedVersionView.showView(currentVersion, gVersion, gUpdateMessage);
+                        recommendedVersionView.showView(resumedActivity, currentVersion, gVersion, gUpdateMessage);
                     }
                 }
             });
@@ -157,19 +200,27 @@ public class ForceUpdate {
 
         private Application application;
 
-        private AsyncVersionProvider forcedVersionProvider;
+        private AsyncVersionProvider minAllowedVersionProvider = null;
 
-        private int forcedVersionInterval = 24 * 3600;
+        private int minAllowedVersionInterval = 24 * 3600;
 
         private AsyncVersionProvider recommendedVersionProvider;
 
         private int recommendedVersionInterval = 24 * 3600;
 
+        private AsyncVersionProvider excludedVersionListProvider;
+
+        private int excludedVersionListInterval = 24 * 3600;
+
         private VersionProvider currentVersionProvider;
 
+        //TODO [1] define default activity view
         private UpdateView forcedVersionView;
 
+        //TODO [1] define default dialog view
         private UpdateView recommendedVersionView;
+
+        private List<Class<?>> forceUpdateActivities = new ArrayList<>();
 
         public Builder() {
 
@@ -178,17 +229,31 @@ public class ForceUpdate {
         public Builder application(Application gApplication) {
             application = gApplication;
 
-            return this;
-        }
-
-        public Builder forcedVersionProvider(AsyncVersionProvider gProvider) {
-            forcedVersionProvider = gProvider;
+            forceUpdateActivities.add(ForceUpdateActivity.class);
 
             return this;
         }
 
-        public Builder forcedVersionCheckMinInterval(int gSeconds) {
-            forcedVersionInterval = gSeconds;
+        public Builder minAllowedVersionProvider(AsyncVersionProvider gProvider) {
+            minAllowedVersionProvider = gProvider;
+
+            return this;
+        }
+
+        public Builder minAllowedVersionCheckMinInterval(int gSeconds) {
+            minAllowedVersionInterval = gSeconds;
+
+            return this;
+        }
+
+        public Builder excludedVersionListProvider(AsyncVersionProvider gProvider) {
+            excludedVersionListProvider = gProvider;
+
+            return this;
+        }
+
+        public Builder excludedVersionListCheckMinInterval(int gSeconds) {
+            excludedVersionListInterval = gSeconds;
 
             return this;
         }
@@ -224,10 +289,28 @@ public class ForceUpdate {
             return this;
         }
 
+        public Builder addForceUpdateActivity(Class<?> gActivity) {
+            forceUpdateActivities.add(gActivity);
+
+            return this;
+        }
+
         public ForceUpdate build() {
-            return new ForceUpdate(application, forcedVersionProvider, forcedVersionInterval,
+            if(application == null) {
+                throw new RuntimeException("Please call ForceUpdate.Builder#application(Application) method before build.");
+            }
+
+            if(currentVersionProvider == null) {
+                currentVersionProvider = new ApkVersionProvider(application);
+            }
+
+            if(recommendedVersionProvider == null) {
+                recommendedVersionProvider = new CarretoVersionProvider(application);
+            }
+
+            return new ForceUpdate(application, minAllowedVersionProvider, minAllowedVersionInterval,
                     recommendedVersionProvider, recommendedVersionInterval, currentVersionProvider,
-                    forcedVersionView, recommendedVersionView);
+                    forcedVersionView, recommendedVersionView, forceUpdateActivities);
         }
 
         public ForceUpdate buildAndInit() {

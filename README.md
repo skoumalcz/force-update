@@ -42,17 +42,23 @@ To init ForceUpdate library use this simple builder in your Application:
         // required - needs android.app.Application object
         .application(this)
 
-        // defaults to version 0 - no force update view will ever appear
-        .forcedVersionProvider(new MyCustomVersionProvider())
+        // defaults to NULL - no force update view will ever appear
+        .minAllowedVersionProvider(new MyCustomVersionProvider())
 
         // defaults to 24 hours
-        .forcedVersionCheckMinInterval(4 * 3600)
+        .minAllowedVersionCheckMinInterval(4 * 3600)
 
-        // defaults to version from http://carreto.pt/tools/android-store-version/?package=<your package>)
+        // defaults to version from http://carreto.pt/tools/android-store-version/?package=<your package>
         .recommendedVersionProvider(new GooglePlayVersionProvider())
 
         // defaults to 24 hours
         .recommendedVersionCheckMinInterval(6 * 3600)
+
+        // defaults to NULL - no force update view will ever appear
+        .excludedVersionProvider(new MyExcludedVersionListProvider())
+
+        // defaults to 24 hours
+        .excludedVersionCheckMinInterval(8 * 3600)
 
         // defaults to current apk version
         .currentVersionProvider(new ApkVersionProvider())

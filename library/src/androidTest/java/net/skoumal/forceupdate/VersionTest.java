@@ -51,6 +51,13 @@ public class VersionTest {
         }
 
         try {
+            new Version("4..5.6");
+            fail("Should throw exception.");
+        } catch (RuntimeException e) {
+            // desired behaviour
+        }
+
+        try {
             new Version("-4.5");
             fail("Should throw exception.");
         } catch (RuntimeException e) {

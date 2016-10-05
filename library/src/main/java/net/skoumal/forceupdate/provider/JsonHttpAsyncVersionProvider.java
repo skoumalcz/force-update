@@ -14,8 +14,12 @@ import org.json.JSONObject;
  */
 public class JsonHttpAsyncVersionProvider extends AbstractHttpAsyncVersionProvider {
 
-    private String versionAttribute;
-    private String descriptionAttribute;
+    private String versionAttribute = "version";
+    private String descriptionAttribute = "version_description";
+
+    public JsonHttpAsyncVersionProvider(String gUrl) {
+        super(gUrl);
+    }
 
     public JsonHttpAsyncVersionProvider(String gUrl, String gVersionAttribute, String gDescriptionAttribute) {
         super(gUrl);
