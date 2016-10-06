@@ -1,5 +1,6 @@
 package net.skoumal.forceupdate;
 
+import android.text.LoginFilter;
 import android.util.Log;
 
 /**
@@ -15,5 +16,13 @@ public class ForceUpdateLogger {
 
     public static void w(String gMsg, Exception gException) {
         Log.w(TAG, gMsg, gException);
+    }
+
+    public static void e(String gMsg) {
+        e(gMsg, null);
+    }
+
+    public static void e(String gMsg, Exception gException) {
+        Log.e(TAG, gMsg, gException);
     }
 }

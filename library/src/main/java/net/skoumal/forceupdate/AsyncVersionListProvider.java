@@ -13,6 +13,8 @@ public interface AsyncVersionListProvider {
 
         void versionList(List<Version> gVersionList, List<String> gPayloadList);
 
+        void error(String gMessage);
+
     }
 
 }

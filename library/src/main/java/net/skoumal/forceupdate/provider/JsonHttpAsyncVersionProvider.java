@@ -1,6 +1,7 @@
 package net.skoumal.forceupdate.provider;
 
 import android.app.Application;
+import android.text.TextUtils;
 import android.util.Log;
 
 import net.skoumal.forceupdate.ForceUpdateLogger;
@@ -34,16 +35,34 @@ public class JsonHttpAsyncVersionProvider extends AbstractHttpAsyncVersionProvid
         try {
             mainObject = new JSONObject(gResponseString);
 
-            String versionString = mainObject.getString(versionAttribute);
-            String versionDescription = mainObject.getString(descriptionAttribute);
+            String versionString = getStringOrNull(mainObject, versionAttribute);
+            String versionDescription = getStringOrNull(mainObject, descriptionAttribute);
 
-            gResult.version(new Version(versionString), versionDescription);
+            if(!TextUtils.isEmpty(versionString)) {
+                gResult.version(new Version(versionString), versionDescription);
+            } else {
+                gResult.error("Attribute is empty \"" + versionAttribute + "\" or not present in JSON response.");
+            }
 
         } catch (JSONException e) {
+            String errorMessage = "Error when parsing json from " + getUrl();
             if(ForceUpdateLogger.isWarnEnabled()) {
-                ForceUpdateLogger.w("Error when parsing json from " + getUrl(), e);
+                ForceUpdateLogger.w(errorMessage, e);
             }
-            gResult.version(null, null);
+            gResult.error(errorMessage);
+        }
+    }
+
+    private String getStringOrNull(JSONObject gJsonObject, String gAttribute) {
+        if(gJsonObject.has(gAttribute)) {
+            try {
+                return gJsonObject.getString(gAttribute);
+            } catch (JSONException e) {
+                // should be covered by gJsonObject.has() condition :-)
+                return null;
+            }
+        } else {
+            return null;
         }
     }
 }

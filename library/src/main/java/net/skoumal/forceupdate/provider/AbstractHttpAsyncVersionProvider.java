@@ -66,14 +66,14 @@ public abstract class AbstractHttpAsyncVersionProvider implements AsyncVersionPr
                         processHttpResponse(response.toString(), gResult);
                     } else {
                         // simply send empty result
-                        gResult.version(null, null);
+                        gResult.error("HTTP status code " + status + " returned");
                     }
 
                 } catch (MalformedURLException e) {
                     throw new RuntimeException(e);
                 } catch (IOException e) {
                     // simply send empty result
-                    gResult.version(null, null);
+                    gResult.error(e.toString());
                 } finally {
                     if(urlConnection != null) {
                         urlConnection.disconnect();

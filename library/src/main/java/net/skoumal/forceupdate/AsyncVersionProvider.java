@@ -11,6 +11,8 @@ public interface AsyncVersionProvider {
 
         void version(Version gVersion, String gPayload);
 
+        void error(String gMessage);
+
     }
 
 }
