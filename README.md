@@ -1,6 +1,8 @@
 ForceUpdate
 ============
 
+This library is currently in __concept phase__ feel free to stare it but do not try to use it :-)
+
 Force your users to update the app, or notify about non-critical updates.
 
 
@@ -20,7 +22,7 @@ compile 'net.skoumal.forceupdate:force-update:0.1.0'
 Usage
 -----
 
-This library was designed with full customizability in mind. Whole library is based on three simple
+This library was designed with full customisability in mind. Whole library is based on three simple
 terms:
 
 * **VersionProvider** - provides version from some source, for example from your APK, Google Play,
@@ -79,6 +81,13 @@ Extras
 Library is able to detect crash during last version check and hangs main thread during next app
 start to avoid any other code execution and allow successful version check. If there is new version
 available it fires notification automatically.
+
+Contact
+=======
+
+Feel free to [report any issues](https://github.com/skoumalcz/force-update/issues/new) or for the library on contribute few pieces of code!
+
+Follow us on Twitter! [@skoumal_dev](https://twitter.com/skoumal_dev)
 
 License
 =======

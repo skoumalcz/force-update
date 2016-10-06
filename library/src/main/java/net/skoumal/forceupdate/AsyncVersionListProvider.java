@@ -11,7 +11,9 @@ public interface AsyncVersionListProvider {
 
     interface VersionListProviderResult {
 
-        void versionList(List<Version> gVersion, String gUpdateMessage);
+        void versionList(List<Version> gVersionList, List<String> gPayloadList);
+
+        void error(String gMessage);
 
     }
 

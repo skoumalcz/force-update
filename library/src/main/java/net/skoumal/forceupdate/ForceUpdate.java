@@ -73,6 +73,10 @@ public class ForceUpdate {
             throw new RuntimeException("Internet permission is necessary for version checks.");
         }
 
+        if(gForcedVersionInterval < 60 || gRecommendedVersionInterval < 60 || gExcludedVersionListInterval < 60) {
+            throw new RuntimeException("Minimal fetch interval is 60s");
+        }
+
         application = gApplication;
 
         forcedVersionProvider = gForcedVersionProvider;
@@ -180,12 +184,17 @@ public class ForceUpdate {
                 lastMinAllowedVersionRequest + (forcedVersionInterval * 1000) < System.currentTimeMillis()) {
             forcedVersionProvider.getVersion(new AsyncVersionProvider.VersionProviderResult() {
                 @Override
-                public void version(Version gVersion, String gUpdateMessage) {
+                public void version(Version gVersion, String gPayload) {
                     Version currentVersion = currentVersionProvider.getVersion();
 
                     if(currentVersion.compareTo(gVersion) < 0 && resumedActivity != null) {
-                        forcedVersionView.showView(resumedActivity, currentVersion, gVersion, gUpdateMessage);
+                        forcedVersionView.showView(resumedActivity, currentVersion, gVersion, gPayload);
                     }
+                }
+
+                @Override
+                public void error(String gMessage) {
+                    ForceUpdateLogger.e(gMessage);
                 }
             });
         }
@@ -194,13 +203,18 @@ public class ForceUpdate {
                 lastRecommendedVersionRequest + (recommendedVersionInterval * 1000) < System.currentTimeMillis()) {
             recommendedVersionProvider.getVersion(new AsyncVersionProvider.VersionProviderResult() {
                 @Override
-                public void version(Version gVersion, String gUpdateMessage) {
+                public void version(Version gVersion, String gPayload) {
                     Version currentVersion = currentVersionProvider.getVersion();
 
                     if(currentVersion.compareTo(gVersion) < 0 && resumedActivity != null) {
                         // TODO [1] avoid showing recommended view when force update is available
-                        recommendedVersionView.showView(resumedActivity, currentVersion, gVersion, gUpdateMessage);
+                        recommendedVersionView.showView(resumedActivity, currentVersion, gVersion, gPayload);
                     }
+                }
+
+                @Override
+                public void error(String gMessage) {
+                    ForceUpdateLogger.e(gMessage);
                 }
             });
         }
@@ -209,15 +223,21 @@ public class ForceUpdate {
                 lastExcludedVersionRequest + (excludedVersionInterval * 1000) < System.currentTimeMillis()) {
             excludedVersionProvider.getVersionList(new AsyncVersionListProvider.VersionListProviderResult() {
                 @Override
-                public void versionList(List<Version> gVersionList, String gUpdateMessage) {
+                public void versionList(List<Version> gVersionList, List<String> gPayloadList) {
                     Version currentVersion = currentVersionProvider.getVersion();
 
-                    for(Version version : gVersionList) {
+                    for(int i = 0; i < gVersionList.size(); i++) {
+                        Version version = gVersionList.get(i);
                         if (currentVersion.compareTo(version) < 0 && resumedActivity != null) {
                             // TODO [1] avoid showing another forced update when it is already visible
-                            forcedVersionView.showView(resumedActivity, currentVersion, version, gUpdateMessage);
+                            forcedVersionView.showView(resumedActivity, currentVersion, version, gPayloadList.get(i));
                         }
                     }
+                }
+
+                @Override
+                public void error(String gMessage) {
+                    ForceUpdateLogger.e(gMessage);
                 }
             });
         }
@@ -272,6 +292,10 @@ public class ForceUpdate {
         }
 
         public Builder minAllowedVersionCheckMinInterval(int gSeconds) {
+            if(gSeconds < 60) {
+                throw new RuntimeException("Minimum check interval is 60s");
+            }
+
             minAllowedVersionInterval = gSeconds;
 
             return this;
@@ -284,6 +308,10 @@ public class ForceUpdate {
         }
 
         public Builder excludedVersionListCheckMinInterval(int gSeconds) {
+            if(gSeconds < 60) {
+                throw new RuntimeException("Minimum check interval is 60s");
+            }
+
             excludedVersionListInterval = gSeconds;
 
             return this;
@@ -296,6 +324,10 @@ public class ForceUpdate {
         }
 
         public Builder recommendedVersionCheckMinInterval(int gSeconds) {
+            if(gSeconds < 60) {
+                throw new RuntimeException("Minimum check interval is 60s");
+            }
+
             recommendedVersionInterval = gSeconds;
 
             return this;
