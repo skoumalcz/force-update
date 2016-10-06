@@ -20,9 +20,11 @@ public class ForceUpdate {
 
     private static final String SHARED_PREFERENCES_REQUEST_INTERRUPTED = "request_interrupted";
 
-    private static final String SHARED_PREFERENCES_LAST_FORCE_VERSION_REQUEST = "last_force_version_request";
+    private static final String SHARED_PREFERENCES_LAST_MIN_ALLOWED_VERSION_REQUEST = "last_min_allowed_version_request";
 
-    private static final String SHARED_PREFERENCES_RECOMMENDED_VERSION_REQUEST = "last_recommended_version_request";
+    private static final String SHARED_PREFERENCES_LAST_RECOMMENDED_VERSION_REQUEST = "last_recommended_version_request";
+
+    private static final String SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS_REQUEST = "last_excluded_versions_request";
 
     private static boolean alreadyInstantiated;
 
@@ -35,6 +37,10 @@ public class ForceUpdate {
     private AsyncVersionProvider recommendedVersionProvider;
 
     private int recommendedVersionInterval;
+
+    private AsyncVersionListProvider excludedVersionProvider;
+
+    private int excludedVersionInterval;
 
     private VersionProvider currentVersionProvider;
 
@@ -51,6 +57,7 @@ public class ForceUpdate {
     public ForceUpdate(Application gApplication,
                        AsyncVersionProvider gForcedVersionProvider, int gForcedVersionInterval,
                        AsyncVersionProvider gRecommendedVersionProvider, int gRecommendedVersionInterval,
+                       AsyncVersionListProvider gExcludedVersionListProvider, int gExcludedVersionListInterval,
                        VersionProvider gCurrentVersionProvider,
                        UpdateView gForcedVersionView,
                        UpdateView gRecommendedVersionView,
@@ -75,6 +82,10 @@ public class ForceUpdate {
         recommendedVersionProvider = gRecommendedVersionProvider;
 
         recommendedVersionInterval = gRecommendedVersionInterval;
+
+        excludedVersionProvider  = gExcludedVersionListProvider;
+
+        excludedVersionInterval = gExcludedVersionListInterval;
 
         currentVersionProvider = gCurrentVersionProvider;
 
@@ -159,12 +170,14 @@ public class ForceUpdate {
     private void checkForUpdate() {
         //TODO [1] finalize request interruption detection and show notification when last request was interrupted and there is update, ideal way is to show notification only in case of crash
         boolean previousRequestInterrupted = sharedPreferences.getBoolean(SHARED_PREFERENCES_REQUEST_INTERRUPTED, false);
-        long lastForcedVersionRequest = sharedPreferences.getLong(SHARED_PREFERENCES_LAST_FORCE_VERSION_REQUEST, 0);
-        long lastRecommendedVersionRequest = sharedPreferences.getLong(SHARED_PREFERENCES_RECOMMENDED_VERSION_REQUEST, 0);
+        long lastMinAllowedVersionRequest = sharedPreferences.getLong(SHARED_PREFERENCES_LAST_MIN_ALLOWED_VERSION_REQUEST, 0);
+        long lastRecommendedVersionRequest = sharedPreferences.getLong(SHARED_PREFERENCES_LAST_RECOMMENDED_VERSION_REQUEST, 0);
+        long lastExcludedVersionRequest = sharedPreferences.getLong(SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS_REQUEST, 0);
 
         sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_REQUEST_INTERRUPTED, true).apply();
 
-        if(lastForcedVersionRequest + (forcedVersionInterval * 1000) < System.currentTimeMillis()) {
+        if(forcedVersionProvider != null &&
+                lastMinAllowedVersionRequest + (forcedVersionInterval * 1000) < System.currentTimeMillis()) {
             forcedVersionProvider.getVersion(new AsyncVersionProvider.VersionProviderResult() {
                 @Override
                 public void version(Version gVersion, String gUpdateMessage) {
@@ -177,7 +190,8 @@ public class ForceUpdate {
             });
         }
 
-        if(lastRecommendedVersionRequest + (recommendedVersionInterval * 1000) < System.currentTimeMillis()) {
+        if(recommendedVersionProvider != null &&
+                lastRecommendedVersionRequest + (recommendedVersionInterval * 1000) < System.currentTimeMillis()) {
             recommendedVersionProvider.getVersion(new AsyncVersionProvider.VersionProviderResult() {
                 @Override
                 public void version(Version gVersion, String gUpdateMessage) {
@@ -191,8 +205,25 @@ public class ForceUpdate {
             });
         }
 
+        if(excludedVersionProvider != null &&
+                lastExcludedVersionRequest + (excludedVersionInterval * 1000) < System.currentTimeMillis()) {
+            excludedVersionProvider.getVersionList(new AsyncVersionListProvider.VersionListProviderResult() {
+                @Override
+                public void versionList(List<Version> gVersionList, String gUpdateMessage) {
+                    Version currentVersion = currentVersionProvider.getVersion();
+
+                    for(Version version : gVersionList) {
+                        if (currentVersion.compareTo(version) < 0 && resumedActivity != null) {
+                            // TODO [1] avoid showing another forced update when it is already visible
+                            forcedVersionView.showView(resumedActivity, currentVersion, version, gUpdateMessage);
+                        }
+                    }
+                }
+            });
+        }
+
         if(previousRequestInterrupted) {
-            // block main thread till the request finishes to avoid crash during request
+            // TODO [2] block main thread till the request finishes to avoid crash during request
         }
     }
 
@@ -208,7 +239,7 @@ public class ForceUpdate {
 
         private int recommendedVersionInterval = 24 * 3600;
 
-        private AsyncVersionProvider excludedVersionListProvider;
+        private AsyncVersionListProvider excludedVersionListProvider;
 
         private int excludedVersionListInterval = 24 * 3600;
 
@@ -246,7 +277,7 @@ public class ForceUpdate {
             return this;
         }
 
-        public Builder excludedVersionListProvider(AsyncVersionProvider gProvider) {
+        public Builder excludedVersionListProvider(AsyncVersionListProvider gProvider) {
             excludedVersionListProvider = gProvider;
 
             return this;
@@ -308,9 +339,13 @@ public class ForceUpdate {
                 recommendedVersionProvider = new CarretoVersionProvider(application);
             }
 
-            return new ForceUpdate(application, minAllowedVersionProvider, minAllowedVersionInterval,
-                    recommendedVersionProvider, recommendedVersionInterval, currentVersionProvider,
-                    forcedVersionView, recommendedVersionView, forceUpdateActivities);
+            return new ForceUpdate(application,
+                    minAllowedVersionProvider, minAllowedVersionInterval,
+                    recommendedVersionProvider, recommendedVersionInterval,
+                    excludedVersionListProvider, excludedVersionListInterval,
+                    currentVersionProvider,
+                    forcedVersionView, recommendedVersionView,
+                    forceUpdateActivities);
         }
 
         public ForceUpdate buildAndInit() {
