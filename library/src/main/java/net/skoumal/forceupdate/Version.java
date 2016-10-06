@@ -1,5 +1,7 @@
 package net.skoumal.forceupdate;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
 import java.util.Arrays;
@@ -9,7 +11,7 @@ import java.util.List;
 /**
  * Created by gingo on 25.9.2016.
  */
-public class Version implements Comparable<Version> {
+public class Version implements Comparable<Version>, Parcelable {
 
     private int[] version;
 
@@ -21,6 +23,8 @@ public class Version implements Comparable<Version> {
 
         List<Integer> versionParts = new LinkedList<Integer>();
 
+        // TODO [1] consider splitting string by "." character first
+        // TODO [1] cover "1.3..4" => [1, 3] case
         StringBuilder currentPart = new StringBuilder();
         for (int i = 0; true; i++) {
 
@@ -33,8 +37,7 @@ public class Version implements Comparable<Version> {
                 currentPart.append(gVersionString.charAt(i));
             }
 
-
-            if (!currentCharIsDigit || i == gVersionString.length() - 1) { // end of part
+            if(!currentCharIsDigit || currentCharIsLastOne) { // end of part
                 versionParts.add(Integer.valueOf(currentPart.toString()));
                 currentPart = new StringBuilder();
             }
@@ -112,4 +115,30 @@ public class Version implements Comparable<Version> {
         }
         return versionName;
     }
+
+    protected Version(Parcel in) {
+        in.readIntArray(version);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeIntArray(version);
+    }
+
+    public static final Parcelable.Creator<Version> CREATOR = new Parcelable.Creator<Version>() {
+        @Override
+        public Version createFromParcel(Parcel in) {
+            return new Version(in);
+        }
+
+        @Override
+        public Version[] newArray(int size) {
+            return new Version[size];
+        }
+    };
 }

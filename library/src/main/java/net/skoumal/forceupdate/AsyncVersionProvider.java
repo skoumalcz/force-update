@@ -9,7 +9,7 @@ public interface AsyncVersionProvider {
 
     interface VersionProviderResult {
 
-        void version(Version gVersion, String gUpdateMessage);
+        void version(Version gVersion, String gPayload);
 
     }
 
