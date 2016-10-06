@@ -73,6 +73,10 @@ public class ForceUpdate {
             throw new RuntimeException("Internet permission is necessary for version checks.");
         }
 
+        if(gForcedVersionInterval < 60 || gRecommendedVersionInterval < 60 || gExcludedVersionListInterval < 60) {
+            throw new RuntimeException("Minimal fetch interval is 60s");
+        }
+
         application = gApplication;
 
         forcedVersionProvider = gForcedVersionProvider;
@@ -272,6 +276,10 @@ public class ForceUpdate {
         }
 
         public Builder minAllowedVersionCheckMinInterval(int gSeconds) {
+            if(gSeconds < 60) {
+                throw new RuntimeException("Minimum check interval is 60s");
+            }
+
             minAllowedVersionInterval = gSeconds;
 
             return this;
@@ -284,6 +292,10 @@ public class ForceUpdate {
         }
 
         public Builder excludedVersionListCheckMinInterval(int gSeconds) {
+            if(gSeconds < 60) {
+                throw new RuntimeException("Minimum check interval is 60s");
+            }
+
             excludedVersionListInterval = gSeconds;
 
             return this;
@@ -296,6 +308,10 @@ public class ForceUpdate {
         }
 
         public Builder recommendedVersionCheckMinInterval(int gSeconds) {
+            if(gSeconds < 60) {
+                throw new RuntimeException("Minimum check interval is 60s");
+            }
+
             recommendedVersionInterval = gSeconds;
 
             return this;

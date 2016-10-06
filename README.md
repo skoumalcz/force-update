@@ -1,6 +1,8 @@
 ForceUpdate
 ============
 
+This library is currently in __concept phase__ feel free to stare it but do not try to use it :-)
+
 Force your users to update the app, or notify about non-critical updates.
 
 
