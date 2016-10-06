@@ -158,7 +158,7 @@ public class ForceUpdate {
             }
         }
 
-        if(isForceUpdateActivity) {
+        if(!isForceUpdateActivity) {
             resumedActivity = gActivity;
 
             checkForUpdate();

@@ -41,7 +41,6 @@ public abstract class AbstractHttpAsyncVersionProvider implements AsyncVersionPr
             @Override
             public void run() {
 
-
                 HttpURLConnection urlConnection = null;
                 try {
 
