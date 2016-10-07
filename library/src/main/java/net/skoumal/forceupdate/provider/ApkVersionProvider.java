@@ -6,13 +6,14 @@ import android.content.pm.PackageManager;
 
 import net.skoumal.forceupdate.Version;
 import net.skoumal.forceupdate.VersionProvider;
+import net.skoumal.forceupdate.VersionResult;
 
 /**
  * Created by gingo on 26.9.2016.
  */
 public class ApkVersionProvider implements VersionProvider {
 
-    private Version version;
+    private VersionResult versionResult;
 
     public ApkVersionProvider(Application gApplication) {
         PackageInfo pInfo = null;
@@ -22,11 +23,13 @@ public class ApkVersionProvider implements VersionProvider {
             throw new RuntimeException(e);
         }
 
-        version = new Version(pInfo.versionName);
+        Version version = new Version(pInfo.versionName);
+
+        versionResult = new VersionResult(version, null);
     }
 
     @Override
-    public Version getVersion() {
-        return version;
+    public VersionResult getVersion() {
+        return versionResult;
     }
 }

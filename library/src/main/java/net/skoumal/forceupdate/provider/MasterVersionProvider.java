@@ -1,8 +1,7 @@
 package net.skoumal.forceupdate.provider;
 
 import net.skoumal.forceupdate.Version;
-import net.skoumal.forceupdate.provider.SlaveAsyncVersionListProvider;
-import net.skoumal.forceupdate.provider.SlaveAsyncVersionProvider;
+import net.skoumal.forceupdate.VersionResult;
 
 import java.util.List;
 
@@ -11,48 +10,37 @@ import java.util.List;
  */
 public abstract class MasterVersionProvider {
 
-    private SlaveAsyncVersionProvider recommendedProvider;
+    private SlaveVersionProvider recommendedProvider;
 
-    private SlaveAsyncVersionProvider minAllowedProvider;
+    private SlaveVersionProvider minAllowedProvider;
 
-    private SlaveAsyncVersionListProvider excludedProvider;
+    private SlaveVersionProvider excludedProvider;
 
     private boolean fetchInProgress = false;
 
     public void fetchVersions() {
 
-        if(fetchInProgress) {
-            return;
-        }
-
         synchronized (this) {
-            if(fetchInProgress) {
-                return;
-            } else {
-                fetchInProgress = true;
-            }
+            fetchAndPutVersions();
         }
 
-        fetchAndPutVersions();
-
-        fetchInProgress = false;
     }
 
-    public void putRecommendedVersion(Version gVersion, String gPayload) {
+    public void putRecommendedVersionResult(VersionResult gResult) {
         if(recommendedProvider != null) {
-            recommendedProvider.putVersion(gVersion, gPayload);
+            recommendedProvider.putVersionResult(gResult);
         }
     }
 
-    public void putMinAllowedVersion(Version gVersion, String gPayload) {
+    public void putMinAllowedVersion(VersionResult gResult) {
         if(minAllowedProvider != null) {
-            minAllowedProvider.putVersion(gVersion, gPayload);
+            minAllowedProvider.putVersionResult(gResult);
         }
     }
 
-    public void putExcludedVersionList(List<Version> gVersionList, List<String> gPayloadList) {
+    public void putExcludedVersionList(VersionResult gResult) {
         if(excludedProvider != null) {
-            excludedProvider.putVersionList(gVersionList, gPayloadList);
+            excludedProvider.putVersionResult(gResult);
         }
     }
 

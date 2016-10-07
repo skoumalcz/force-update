@@ -5,6 +5,6 @@ package net.skoumal.forceupdate;
  */
 public interface VersionProvider {
 
-    Version getVersion();
+    VersionResult getVersion();
 
 }

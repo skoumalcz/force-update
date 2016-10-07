@@ -5,7 +5,7 @@ import android.app.Application;
 /**
  * Created by gingo on 26.9.2016.
  */
-public class CarretoVersionProvider extends JsonHttpAsyncVersionProvider {
+public class CarretoVersionProvider extends JsonHttpVersionProvider {
 
     private static final String URL_ADDRESS = "http://carreto.pt/tools/android-store-version/?package=";
 
