@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.widget.TextView;
 
 import net.skoumal.forceupdate.example.R;
 
@@ -17,21 +18,23 @@ public class CustomForceUpdateActivity extends Activity {
     private static final String EXTRA_FORCED_VERSION = "extra_forced_version";
     private static final String EXTRA_FORCED_VERSION_DESCRIPTION = "extra_forced_version_description";
 
-
     @Override
-    public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
-        super.onCreate(savedInstanceState, persistentState);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_forced_update);
+
+        TextView updateDescriptionTextview = (TextView) findViewById(R.id.textview_force_update_description);
+        updateDescriptionTextview.setText(getIntent().getExtras().getString(EXTRA_FORCED_VERSION_DESCRIPTION));
     }
 
-    public static void start(Context context, String actualVersion, String forcedVersion, String forcedVersionDescription) {
-        Intent starter = new Intent(context, CustomForceUpdateActivity.class);
-        starter.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    public static void start(Activity activity, String actualVersion, String forcedVersion, String forcedVersionDescription) {
+        Intent starter = new Intent(activity, CustomForceUpdateActivity.class);
 
         starter.putExtra(EXTRA_ACTUAL_VERSION, actualVersion);
         starter.putExtra(EXTRA_FORCED_VERSION, forcedVersion);
         starter.putExtra(EXTRA_FORCED_VERSION_DESCRIPTION, forcedVersionDescription);
 
-        context.startActivity(starter);
+        activity.startActivity(starter);
     }
 }
