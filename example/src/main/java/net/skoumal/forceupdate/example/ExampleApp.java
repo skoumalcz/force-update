@@ -1,5 +1,6 @@
 package net.skoumal.forceupdate.example;
 
+import android.app.Activity;
 import android.app.Application;
 
 import net.skoumal.forceupdate.ForceUpdate;
@@ -25,11 +26,12 @@ public class ExampleApp extends Application {
         new ForceUpdate.Builder()
                 .application(this)
                 .currentVersionProvider(new ApkVersionProvider(this))
-                .forcedVersionProvider(forcedVersionProvider)
+                .minAllowedVersionProvider(forcedVersionProvider)
+                .addForceUpdateActivity(CustomForceUpdateActivity.class)
                 .forcedUpdateView(new UpdateView() {
                     @Override
-                    public void showView(Version gCurrentVersion, Version gRequiredVersion, String gUpdateMessage) {
-                        CustomForceUpdateActivity.start(ExampleApp.this, gCurrentVersion.toString(), gRequiredVersion.toString(), gUpdateMessage);
+                    public void showView(Activity gActivity, Version gCurrentVersion, Version gRequiredVersion, String gUpdateMessage) {
+                        CustomForceUpdateActivity.start(gActivity, gCurrentVersion.toString(), gRequiredVersion.toString(), gUpdateMessage);
                     }
                 })
                 .buildAndInit();
