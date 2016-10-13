@@ -21,6 +21,16 @@ public class VersionTest {
         assertEquals(0, v.getVersionParts()[0]);
         assertEquals(1, v.getVersionParts()[1]);
         assertEquals(2, v.getVersionParts()[2]);
+        assertEquals(3, v.getVersionParts().length);
+    }
+
+    @Test
+    public void doubleDotInit() throws Exception {
+        Version v = new Version("0.1..2");
+
+        assertEquals(0, v.getVersionParts()[0]);
+        assertEquals(1, v.getVersionParts()[1]);
+        assertEquals(2, v.getVersionParts().length);
     }
 
     @Test
@@ -45,13 +55,6 @@ public class VersionTest {
 
         try {
             new Version(".4.5");
-            fail("Should throw exception.");
-        } catch (RuntimeException e) {
-            // desired behaviour
-        }
-
-        try {
-            new Version("4..5.6");
             fail("Should throw exception.");
         } catch (RuntimeException e) {
             // desired behaviour

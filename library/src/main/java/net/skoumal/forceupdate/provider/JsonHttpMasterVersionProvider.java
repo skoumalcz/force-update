@@ -18,8 +18,8 @@ import java.util.List;
  */
 public class JsonHttpMasterVersionProvider extends AbstractHttpMasterVersionProvider {
 
-    private static String EXCLUDED_VERSION_ATTRIBUTE = "version";
-    private static String EXCLUDED_PAYLOAD_ATTRIBUTE = "payload";
+    private static final String EXCLUDED_VERSION_ATTRIBUTE = "version";
+    private static final String EXCLUDED_PAYLOAD_ATTRIBUTE = "payload";
 
     private String recommendedVersionAttribute = "recommended_version";
     private String recommendedPayloadAttribute = "recommended_payload";

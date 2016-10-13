@@ -9,26 +9,26 @@ import net.skoumal.forceupdate.Version;
 /**
  * Created by gingo on 1.10.2016.
  */
-public abstract class AbstractActivityUpdateView implements UpdateView {
+public class ActivityUpdateView implements UpdateView {
 
     public static final String CURRENT_VERSION_EXTRA = "current_version";
     public static final String REQUIRED_VERSION_EXTRA = "required_version";
-    public static final String UPDATE_MESSAGE_EXTRA = "update_message";
+    public static final String PAYLOAD_EXTRA = "payload";
 
     private Class<?> activityClass;
 
-    public AbstractActivityUpdateView(Class<?> gActivityClass) {
+    public ActivityUpdateView(Class<?> gActivityClass) {
         activityClass = gActivityClass;
     }
 
     @Override
-    public void showView(Activity gActivity, Version gCurrentVersion, Version gRequiredVersion, String gUpdateMessage) {
+    public void showView(Activity gActivity, Version gCurrentVersion, Version gRequiredVersion, String gPayload) {
 
         Intent intent = new Intent(gActivity, activityClass);
 
         intent.putExtra(CURRENT_VERSION_EXTRA, gCurrentVersion);
         intent.putExtra(REQUIRED_VERSION_EXTRA, gRequiredVersion);
-        intent.putExtra(UPDATE_MESSAGE_EXTRA, gUpdateMessage);
+        intent.putExtra(PAYLOAD_EXTRA, gPayload);
 
         gActivity.startActivity(intent);
     }

@@ -1,5 +1,7 @@
 package net.skoumal.forceupdate.util;
 
+import android.content.Context;
+
 import net.skoumal.forceupdate.VersionResult;
 
 import java.io.BufferedReader;
@@ -50,6 +52,12 @@ public class Http {
                 urlConnection.disconnect();
             }
         }
+    }
+
+    public static String getGooglePlayUrl(Context gContext) {
+        String packageName = gContext.getApplicationContext().getPackageName();
+
+        return "https://play.google.com/store/apps/details?id=" + packageName;
     }
 
 }

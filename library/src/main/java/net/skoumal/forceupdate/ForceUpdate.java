@@ -9,7 +9,9 @@ import android.os.Bundle;
 
 import net.skoumal.forceupdate.provider.ApkVersionProvider;
 import net.skoumal.forceupdate.provider.CarretoVersionProvider;
+import net.skoumal.forceupdate.view.activity.ActivityUpdateView;
 import net.skoumal.forceupdate.view.activity.ForceUpdateActivity;
+import net.skoumal.forceupdate.view.activity.RecommendedUpdateActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,23 +32,23 @@ public class ForceUpdate {
 
     private Application application;
 
-    private AsyncVersionProvider forcedVersionProvider;
+    private VersionProvider minAllowedVersionProvider;
 
-    private int forcedVersionInterval;
+    private int minAllowedVersionInterval;
 
-    private AsyncVersionProvider recommendedVersionProvider;
+    private VersionProvider recommendedVersionProvider;
 
     private int recommendedVersionInterval;
 
-    private AsyncVersionListProvider excludedVersionProvider;
+    private VersionProvider excludedVersionProvider;
 
     private int excludedVersionInterval;
 
     private VersionProvider currentVersionProvider;
 
-    private UpdateView forcedVersionView;
+    private UpdateView forcedUpdateView;
 
-    private UpdateView recommendedVersionView;
+    private UpdateView recommendedUpdateView;
 
     private List<Class<?>> forceUpdateActivities;
 
@@ -55,9 +57,9 @@ public class ForceUpdate {
     private Activity resumedActivity;
 
     public ForceUpdate(Application gApplication,
-                       AsyncVersionProvider gForcedVersionProvider, int gForcedVersionInterval,
-                       AsyncVersionProvider gRecommendedVersionProvider, int gRecommendedVersionInterval,
-                       AsyncVersionListProvider gExcludedVersionListProvider, int gExcludedVersionListInterval,
+                       VersionProvider gForcedVersionProvider, int gForcedVersionInterval,
+                       VersionProvider gRecommendedVersionProvider, int gRecommendedVersionInterval,
+                       VersionProvider gExcludedVersionListProvider, int gExcludedVersionListInterval,
                        VersionProvider gCurrentVersionProvider,
                        UpdateView gForcedVersionView,
                        UpdateView gRecommendedVersionView,
@@ -79,9 +81,9 @@ public class ForceUpdate {
 
         application = gApplication;
 
-        forcedVersionProvider = gForcedVersionProvider;
+        minAllowedVersionProvider = gForcedVersionProvider;
 
-        forcedVersionInterval = gForcedVersionInterval;
+        minAllowedVersionInterval = gForcedVersionInterval;
 
         recommendedVersionProvider = gRecommendedVersionProvider;
 
@@ -93,9 +95,9 @@ public class ForceUpdate {
 
         currentVersionProvider = gCurrentVersionProvider;
 
-        forcedVersionView = gForcedVersionView;
+        forcedUpdateView = gForcedVersionView;
 
-        recommendedVersionView = gRecommendedVersionView;
+        recommendedUpdateView = gRecommendedVersionView;
 
         forceUpdateActivities = gForceUpdateActivities;
 
@@ -172,104 +174,115 @@ public class ForceUpdate {
     }
 
     private void checkForUpdate() {
+
         //TODO [1] finalize request interruption detection and show notification when last request was interrupted and there is update, ideal way is to show notification only in case of crash
         boolean previousRequestInterrupted = sharedPreferences.getBoolean(SHARED_PREFERENCES_REQUEST_INTERRUPTED, false);
-        long lastMinAllowedVersionRequest = sharedPreferences.getLong(SHARED_PREFERENCES_LAST_MIN_ALLOWED_VERSION_REQUEST, 0);
-        long lastRecommendedVersionRequest = sharedPreferences.getLong(SHARED_PREFERENCES_LAST_RECOMMENDED_VERSION_REQUEST, 0);
-        long lastExcludedVersionRequest = sharedPreferences.getLong(SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS_REQUEST, 0);
 
-        sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_REQUEST_INTERRUPTED, true).apply();
+        new Thread(new Runnable() {
 
-        if(forcedVersionProvider != null &&
-                lastMinAllowedVersionRequest + (forcedVersionInterval * 1000) < System.currentTimeMillis()) {
-            forcedVersionProvider.getVersion(new AsyncVersionProvider.VersionProviderResult() {
-                @Override
-                public void version(Version gVersion, String gPayload) {
-                    Version currentVersion = currentVersionProvider.getVersion();
+            @Override
+            public void run() {
 
-                    if(currentVersion.compareTo(gVersion) < 0 && resumedActivity != null) {
-                        forcedVersionView.showView(resumedActivity, currentVersion, gVersion, gPayload);
-                    }
-                }
+                sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_REQUEST_INTERRUPTED, true).apply();
 
-                @Override
-                public void error(String gMessage) {
-                    ForceUpdateLogger.e(gMessage);
-                }
-            });
-        }
+                Version currentVersion = currentVersionProvider.getVersion().getVersion();
 
-        if(recommendedVersionProvider != null &&
-                lastRecommendedVersionRequest + (recommendedVersionInterval * 1000) < System.currentTimeMillis()) {
-            recommendedVersionProvider.getVersion(new AsyncVersionProvider.VersionProviderResult() {
-                @Override
-                public void version(Version gVersion, String gPayload) {
-                    Version currentVersion = currentVersionProvider.getVersion();
+                checkVersion(minAllowedVersionProvider,
+                        minAllowedVersionInterval,
+                        forcedUpdateView,
+                        currentVersion,
+                        SHARED_PREFERENCES_LAST_MIN_ALLOWED_VERSION_REQUEST);
 
-                    if(currentVersion.compareTo(gVersion) < 0 && resumedActivity != null) {
-                        // TODO [1] avoid showing recommended view when force update is available
-                        recommendedVersionView.showView(resumedActivity, currentVersion, gVersion, gPayload);
-                    }
-                }
+                checkVersion(excludedVersionProvider,
+                        excludedVersionInterval,
+                        forcedUpdateView,
+                        currentVersion,
+                        SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS_REQUEST);
 
-                @Override
-                public void error(String gMessage) {
-                    ForceUpdateLogger.e(gMessage);
-                }
-            });
-        }
+                checkVersion(recommendedVersionProvider,
+                        recommendedVersionInterval,
+                        recommendedUpdateView,
+                        currentVersion,
+                        SHARED_PREFERENCES_LAST_RECOMMENDED_VERSION_REQUEST);
 
-        if(excludedVersionProvider != null &&
-                lastExcludedVersionRequest + (excludedVersionInterval * 1000) < System.currentTimeMillis()) {
-            excludedVersionProvider.getVersionList(new AsyncVersionListProvider.VersionListProviderResult() {
-                @Override
-                public void versionList(List<Version> gVersionList, List<String> gPayloadList) {
-                    Version currentVersion = currentVersionProvider.getVersion();
+                sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_REQUEST_INTERRUPTED, false).apply();
 
-                    for(int i = 0; i < gVersionList.size(); i++) {
-                        Version version = gVersionList.get(i);
-                        if (currentVersion.compareTo(version) < 0 && resumedActivity != null) {
-                            // TODO [1] avoid showing another forced update when it is already visible
-                            forcedVersionView.showView(resumedActivity, currentVersion, version, gPayloadList.get(i));
-                        }
-                    }
-                }
-
-                @Override
-                public void error(String gMessage) {
-                    ForceUpdateLogger.e(gMessage);
-                }
-            });
-        }
+            }
+        }).start();
 
         if(previousRequestInterrupted) {
             // TODO [2] block main thread till the request finishes to avoid crash during request
         }
     }
 
+    private boolean checkVersion(VersionProvider gVersionProvider,
+                              int gVersionInterval,
+                              UpdateView gVersionView,
+                              Version gCurrentVersion,
+                              String gSharedPreferencesLastRequestKey) {
+
+        long lastRequest = sharedPreferences.getLong(gSharedPreferencesLastRequestKey, 0);
+
+        if(gVersionProvider != null &&
+                lastRequest + (gVersionInterval * 1000) < System.currentTimeMillis()) {
+
+            VersionResult result = gVersionProvider.getVersion();
+
+            if(!result.isError()) {
+
+                sharedPreferences.edit().putLong(gSharedPreferencesLastRequestKey, System.currentTimeMillis()).apply();
+
+                if(result.getVersionList().size() < 2) {
+                    Version version = result.getVersion();
+                    if (gCurrentVersion.compareTo(version) < 0 && resumedActivity != null) {
+                        forcedUpdateView.showView(resumedActivity, gCurrentVersion,
+                                result.getVersion(), result.getPayload());
+                        return false;
+                    } else {
+                        return true;
+                    }
+                } else {
+                    List<Version> versionList = result.getVersionList();
+                    for(int i = 0; i < versionList.size(); i++) {
+                        Version version = versionList.get(i);
+                        if (gCurrentVersion.compareTo(version) == 0 && resumedActivity != null) {
+                            forcedUpdateView.showView(resumedActivity, gCurrentVersion, version, result.getPayloadList().get(i));
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+            } else {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static class Builder {
 
         private Application application;
 
-        private AsyncVersionProvider minAllowedVersionProvider = null;
+        private VersionProvider minAllowedVersionProvider = null;
 
         private int minAllowedVersionInterval = 24 * 3600;
 
-        private AsyncVersionProvider recommendedVersionProvider;
+        private VersionProvider recommendedVersionProvider;
 
         private int recommendedVersionInterval = 24 * 3600;
 
-        private AsyncVersionListProvider excludedVersionListProvider;
+        private VersionProvider excludedVersionListProvider;
 
         private int excludedVersionListInterval = 24 * 3600;
 
         private VersionProvider currentVersionProvider;
 
-        //TODO [1] define default activity view
-        private UpdateView forcedVersionView;
+        private UpdateView forcedVersionView = new ActivityUpdateView(ForceUpdateActivity.class);
 
-        //TODO [1] define default dialog view
-        private UpdateView recommendedVersionView;
+        private UpdateView recommendedVersionView = new ActivityUpdateView(RecommendedUpdateActivity.class);;
 
         private List<Class<?>> forceUpdateActivities = new ArrayList<>();
 
@@ -285,7 +298,7 @@ public class ForceUpdate {
             return this;
         }
 
-        public Builder minAllowedVersionProvider(AsyncVersionProvider gProvider) {
+        public Builder minAllowedVersionProvider(VersionProvider gProvider) {
             minAllowedVersionProvider = gProvider;
 
             return this;
@@ -301,7 +314,7 @@ public class ForceUpdate {
             return this;
         }
 
-        public Builder excludedVersionListProvider(AsyncVersionListProvider gProvider) {
+        public Builder excludedVersionListProvider(VersionProvider gProvider) {
             excludedVersionListProvider = gProvider;
 
             return this;
@@ -317,7 +330,7 @@ public class ForceUpdate {
             return this;
         }
 
-        public Builder recommendedVersionProvider(AsyncVersionProvider gProvider) {
+        public Builder recommendedVersionProvider(VersionProvider gProvider) {
             recommendedVersionProvider = gProvider;
 
             return this;

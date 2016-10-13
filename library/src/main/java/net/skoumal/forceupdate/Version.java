@@ -23,29 +23,29 @@ public class Version implements Comparable<Version>, Parcelable {
 
         List<Integer> versionParts = new LinkedList<Integer>();
 
-        // TODO [1] consider splitting string by "." character first
-        // TODO [1] cover "1.3..4" => [1, 3] case
-        StringBuilder currentPart = new StringBuilder();
-        for(int i = 0; true; i++) {
+        String[] versionStringParts = gVersionString.split("\\.");
 
-            char currentChar = gVersionString.charAt(i);
-            boolean currentCharIsDigit = Character.isDigit(currentChar);
-            boolean currentCharIsDot = currentChar == '.';
-            boolean currentCharIsLastOne = i == gVersionString.length() - 1;
-
-            if(currentCharIsDigit) { // new digit in part
-                currentPart.append(gVersionString.charAt(i));
-            }
-
-            if(!currentCharIsDigit || currentCharIsLastOne) { // end of part
-                versionParts.add(Integer.valueOf(currentPart.toString()));
-                currentPart = new StringBuilder();
-            }
-
-            if((!currentCharIsDigit && !currentCharIsDot) || currentCharIsLastOne) {
+        for(String part : versionStringParts) {
+            if(TextUtils.isEmpty(part)) {
                 break;
             }
 
+            if(TextUtils.isDigitsOnly(part)) {
+                versionParts.add(Integer.valueOf(part));
+            } else {
+                int lastNumberIndex = -1;
+                for(int i = 0; i < part.length(); i++) {
+                    if(Character.isDigit(part.charAt(i))) {
+                        lastNumberIndex = i;
+                    } else {
+                        break;
+                    }
+                }
+                if(lastNumberIndex >= 0) {
+                    versionParts.add(Integer.valueOf(part.substring(0, lastNumberIndex + 1)));
+                }
+                break;
+            }
         }
 
         // convert list of Integers to array of priminive ints

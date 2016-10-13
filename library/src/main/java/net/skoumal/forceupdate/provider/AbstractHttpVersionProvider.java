@@ -33,7 +33,7 @@ public abstract class AbstractHttpVersionProvider implements VersionProvider {
 
         try {
             String stringResponse = Http.loadString(url);
-            return processHttpResponse(stringResponse.toString());
+            return processHttpResponse(stringResponse);
         } catch (IOException e) {
             return new VersionResult(e.toString(), e);
         }
