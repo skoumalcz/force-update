@@ -100,6 +100,18 @@ public class Version implements Comparable<Version>, Parcelable {
         return 0;
     }
 
+    @Override
+    public String toString() {
+        String versionName = "";
+        for (int i = 0; i < version.length; i++) {
+            versionName += Integer.toString(version[i]);
+            if (i + 1 < version.length) {
+                versionName += ".";
+            }
+        }
+        return versionName;
+    }
+
     public int [] getVersionParts() {
         return version;
     }
