@@ -1,4 +1,8 @@
 <resources>
 
+    <style name="NoActionBarTheme" parent="android:Theme">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
 
 </resources>
