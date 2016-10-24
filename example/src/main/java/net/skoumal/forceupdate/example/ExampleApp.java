@@ -16,7 +16,7 @@ import net.skoumal.forceupdate.provider.JsonHttpVersionProvider;
 
 public class ExampleApp extends Application {
 
-    private final static boolean SHOW_CUSTOM_FORCED_VIEW = true;
+    private final static boolean SHOW_CUSTOM_FORCED_VIEW = false;
 
     @Override
     public void onCreate() {
