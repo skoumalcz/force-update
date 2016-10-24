@@ -3,9 +3,11 @@ package net.skoumal.forceupdate.view.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import net.skoumal.forceupdate.R;
 import net.skoumal.forceupdate.Version;
+import net.skoumal.forceupdate.util.GooglePlay;
 import net.skoumal.forceupdate.util.Http;
 
 /**
@@ -17,15 +19,20 @@ public class ForceUpdateActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setTheme(R.style.NoActionBarTheme);
+
         setContentView(R.layout.force_update_activity);
 
-        //TODO [1] disable status bar
+        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openGooglePlay();
+            }
+        });
 
     }
 
     public void openGooglePlay() {
-        String url = Http.getGooglePlayUrl(this);
-
-        //TODO [1] open Google Play
+        GooglePlay.openAppDetail(this);
     }
 }
