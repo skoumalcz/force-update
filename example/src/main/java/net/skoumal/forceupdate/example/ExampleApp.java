@@ -16,6 +16,8 @@ import net.skoumal.forceupdate.provider.JsonHttpVersionProvider;
 
 public class ExampleApp extends Application {
 
+    private final static boolean SHOW_CUSTOM_FORCED_VIEW = true;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -23,19 +25,23 @@ public class ExampleApp extends Application {
         JsonHttpVersionProvider forcedVersionProvider
                 = new JsonHttpVersionProvider("http://version.skoumal.net/forceupdate/version.json", "mandatory_version", "description");
 
-        new ForceUpdate.Builder()
+        ForceUpdate.Builder builder = new ForceUpdate.Builder()
                 .application(this)
                 .currentVersionProvider(new ApkVersionProvider(this))
-                .minAllowedVersionProvider(forcedVersionProvider)
-                //here you can show your custom activity or just exclude forcedUpdateView function to use default activity
-                .addForceUpdateActivity(CustomForceUpdateActivity.class)
-                .forcedUpdateView(new UpdateView() {
+                .minAllowedVersionProvider(forcedVersionProvider);
 
-                    @Override
-                    public void showView(Activity gActivity, Version gCurrentVersion, Version gRequiredVersion, String gUpdateMessage) {
-                        CustomForceUpdateActivity.start(gActivity, gCurrentVersion.toString(), gRequiredVersion.toString(), gUpdateMessage);
-                    }
-                })
-                .buildAndInit();
+        if (SHOW_CUSTOM_FORCED_VIEW) {
+            //here you can show your custom activity or just exclude forcedUpdateView function to use default activity
+            builder.addForceUpdateActivity(CustomForceUpdateActivity.class);
+            builder.forcedUpdateView(new UpdateView() {
+
+                @Override
+                public void showView(Activity gActivity, Version gCurrentVersion, Version gRequiredVersion, String gUpdateMessage) {
+                    CustomForceUpdateActivity.start(gActivity, gCurrentVersion.toString(), gRequiredVersion.toString(), gUpdateMessage);
+                }
+            });
+        }
+
+        builder.buildAndInit();
     }
 }
