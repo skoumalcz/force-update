@@ -22,6 +22,8 @@
 
         <activity android:name=".activites.CustomForceUpdateActivity"/>
 
+        <activity android:name="net.skoumal.forceupdate.view.activity.ForceUpdateActivity"/>
+
     </application>
 
 </manifest>

@@ -1,6 +1,7 @@
 package net.skoumal.forceupdate.view.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -34,5 +35,10 @@ public class ForceUpdateActivity extends Activity {
 
     public void openGooglePlay() {
         GooglePlay.openAppDetail(this);
+    }
+
+    public static void start(Activity gActivity) {
+        Intent starter = new Intent(gActivity, ForceUpdateActivity.class);
+        gActivity.startActivity(starter);
     }
 }
