@@ -9,12 +9,15 @@ import android.os.Bundle;
 
 import net.skoumal.forceupdate.provider.ApkVersionProvider;
 import net.skoumal.forceupdate.provider.CarretoVersionProvider;
+import net.skoumal.forceupdate.util.Versions;
 import net.skoumal.forceupdate.view.activity.ActivityUpdateView;
 import net.skoumal.forceupdate.view.activity.ForceUpdateActivity;
 import net.skoumal.forceupdate.view.activity.RecommendedUpdateActivity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ForceUpdate {
 
@@ -27,6 +30,18 @@ public class ForceUpdate {
     private static final String SHARED_PREFERENCES_LAST_RECOMMENDED_VERSION_REQUEST = "last_recommended_version_request";
 
     private static final String SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS_REQUEST = "last_excluded_versions_request";
+
+    private static final String SHARED_PREFERENCES_LAST_MIN_ALLOWED_VERSION = "last_min_allowed_version";
+
+    private static final String SHARED_PREFERENCES_LAST_RECOMMENDED_VERSION = "last_recommended_version";
+
+    private static final String SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS = "last_excluded_versions";
+
+    private static final String SHARED_PREFERENCES_LAST_MIN_ALLOWED_VERSION_PAYLOAD = "last_min_allowed_version_payload";
+
+    private static final String SHARED_PREFERENCES_LAST_RECOMMENDED_VERSION_PAYLOAD = "last_recommended_version_payload";
+
+    private static final String SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS_PAYLOAD = "last_excluded_versions_payload";
 
     private static boolean alreadyInstantiated;
 
@@ -163,9 +178,44 @@ public class ForceUpdate {
         if(!isForceUpdateActivity) {
             resumedActivity = gActivity;
 
+            // show force update view if it is required by min-allowed or excluded version
+            checkSavedMinAllowedAndExcludedVersions();
+
             checkForUpdate();
 
-            //TODO [1] show force update view again if current version is still lower than forced version
+        }
+    }
+
+    private void checkSavedMinAllowedAndExcludedVersions() {
+        String lastMinAllowedVersionStr = sharedPreferences.getString(SHARED_PREFERENCES_LAST_MIN_ALLOWED_VERSION, null);
+        boolean viewShown = false;
+        if(lastMinAllowedVersionStr != null) {
+            Version lastMinAllowedVersion = new Version(lastMinAllowedVersionStr);
+
+            String lastMinAllowedVersionPayload = sharedPreferences.getString(SHARED_PREFERENCES_LAST_MIN_ALLOWED_VERSION_PAYLOAD, null);
+
+            viewShown = showViewIfNeeded(forcedUpdateView, currentVersionProvider.getVersion().getVersion(), lastMinAllowedVersion, lastMinAllowedVersionPayload);
+        }
+
+        if(!viewShown) {
+            Set<String> lastExcludedVersionStrSet = sharedPreferences.getStringSet(SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS, null);
+            List<Version> lastExcludedVersionList;
+            if(lastExcludedVersionStrSet != null) {
+                lastExcludedVersionList = new ArrayList<>(lastExcludedVersionStrSet.size());
+                for (String s : lastExcludedVersionStrSet) {
+                    lastExcludedVersionList.add(new Version(s));
+                }
+
+                Set<String> lastExcludedPayloadSet = sharedPreferences.getStringSet(SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS_PAYLOAD, null);
+                List<String> lastExcludedPayloadList;
+                if(lastExcludedPayloadSet == null) {
+                    lastExcludedPayloadList = new ArrayList<>(0);
+                } else {
+                    lastExcludedPayloadList = new ArrayList<>(lastExcludedPayloadSet);
+                }
+
+                showViewIfNeeded(forcedUpdateView, currentVersionProvider.getVersion().getVersion(), lastExcludedVersionList, lastExcludedPayloadList);
+            }
         }
     }
 
@@ -187,23 +237,33 @@ public class ForceUpdate {
 
                 Version currentVersion = currentVersionProvider.getVersion().getVersion();
 
-                checkVersion(minAllowedVersionProvider,
+                boolean updateAvailable = checkVersion(minAllowedVersionProvider,
                         minAllowedVersionInterval,
                         forcedUpdateView,
                         currentVersion,
-                        SHARED_PREFERENCES_LAST_MIN_ALLOWED_VERSION_REQUEST);
+                        SHARED_PREFERENCES_LAST_MIN_ALLOWED_VERSION_REQUEST,
+                        SHARED_PREFERENCES_LAST_MIN_ALLOWED_VERSION,
+                        SHARED_PREFERENCES_LAST_MIN_ALLOWED_VERSION_PAYLOAD);
 
-                checkVersion(excludedVersionProvider,
-                        excludedVersionInterval,
-                        forcedUpdateView,
-                        currentVersion,
-                        SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS_REQUEST);
+                if(!updateAvailable) {
+                    updateAvailable = checkVersion(excludedVersionProvider,
+                            excludedVersionInterval,
+                            forcedUpdateView,
+                            currentVersion,
+                            SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS_REQUEST,
+                            SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS,
+                            SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS_PAYLOAD);
+                }
 
-                checkVersion(recommendedVersionProvider,
-                        recommendedVersionInterval,
-                        recommendedUpdateView,
-                        currentVersion,
-                        SHARED_PREFERENCES_LAST_RECOMMENDED_VERSION_REQUEST);
+                if(!updateAvailable) {
+                    checkVersion(recommendedVersionProvider,
+                            recommendedVersionInterval,
+                            recommendedUpdateView,
+                            currentVersion,
+                            SHARED_PREFERENCES_LAST_RECOMMENDED_VERSION_REQUEST,
+                            SHARED_PREFERENCES_LAST_RECOMMENDED_VERSION,
+                            SHARED_PREFERENCES_LAST_RECOMMENDED_VERSION_PAYLOAD);
+                }
 
                 sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_REQUEST_INTERRUPTED, false).apply();
 
@@ -215,11 +275,23 @@ public class ForceUpdate {
         }
     }
 
+    /**
+     * Check version in given version provider and compares it with given current version. Version
+     * is checked only in case the defined interval is exceeded.
+     * @param gVersionProvider provider of expected version
+     * @param gVersionInterval how often we should check for expected version
+     * @param gVersionView view to show when update is required / recommended
+     * @param gCurrentVersion current version, typically version of APK
+     * @param gSharedPreferencesLastRequestKey key where last request timestamp will be stored
+     * @return
+     */
     private boolean checkVersion(VersionProvider gVersionProvider,
                               int gVersionInterval,
                               UpdateView gVersionView,
                               Version gCurrentVersion,
-                              String gSharedPreferencesLastRequestKey) {
+                              String gSharedPreferencesLastRequestKey,
+                              String gSharedPreferencesLastVersionKey,
+                              String gSharedPreferencesLastPayloadKey) {
 
         long lastRequest = sharedPreferences.getLong(gSharedPreferencesLastRequestKey, 0);
 
@@ -234,32 +306,54 @@ public class ForceUpdate {
 
                 if(result.getVersionList().size() < 2) {
                     Version version = result.getVersion();
-                    if (gCurrentVersion.compareTo(version) < 0 && resumedActivity != null) {
-                        forcedUpdateView.showView(resumedActivity, gCurrentVersion,
-                                result.getVersion(), result.getPayload());
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    String payload = result.getPayload();
+
+                    sharedPreferences.edit()
+                            .putString(gSharedPreferencesLastVersionKey, version.toString())
+                            .putString(gSharedPreferencesLastPayloadKey, payload)
+                            .apply();
+
+                    return showViewIfNeeded(gVersionView, gCurrentVersion, version, payload);
                 } else {
                     List<Version> versionList = result.getVersionList();
-                    for(int i = 0; i < versionList.size(); i++) {
-                        Version version = versionList.get(i);
-                        if (gCurrentVersion.compareTo(version) == 0 && resumedActivity != null) {
-                            forcedUpdateView.showView(resumedActivity, gCurrentVersion, version, result.getPayloadList().get(i));
-                            return false;
-                        }
-                    }
+                    List<String> payloadList = result.getPayloadList();
 
-                    return true;
+                    sharedPreferences.edit()
+                            .putStringSet(gSharedPreferencesLastVersionKey, Versions.toStringSet(versionList))
+                            .putStringSet(gSharedPreferencesLastPayloadKey, new HashSet<>(payloadList))
+                            .apply();
+
+                    return showViewIfNeeded(gVersionView, gCurrentVersion, versionList, payloadList);
                 }
 
             } else {
-                return false;
+                return true;
             }
         }
 
-        return true;
+        return false;
+    }
+
+    private boolean showViewIfNeeded(UpdateView gVersionView, Version gCurrentVersion, List<Version> gExcludedVersionList, List<String> gExcludedVersionPayloadList) {
+        for(int i = 0; i < gExcludedVersionList.size(); i++) {
+            Version version = gExcludedVersionList.get(i);
+            if (gCurrentVersion.compareTo(version) == 0 && resumedActivity != null) {
+                gVersionView.showView(resumedActivity, gCurrentVersion, version, gExcludedVersionPayloadList.get(i));
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean showViewIfNeeded(UpdateView gVersionView, Version gCurrentVersion, Version gExpectedVersion, String gExpectedVersionPayload) {
+        if (gCurrentVersion.compareTo(gExpectedVersion) < 0 && resumedActivity != null) {
+            gVersionView.showView(resumedActivity, gCurrentVersion,
+                    gExpectedVersion, gExpectedVersionPayload);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public static class Builder {

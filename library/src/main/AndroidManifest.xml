@@ -6,6 +6,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true">
 
+        <activity android:name=".view.activity.ForceUpdateActivity" />
+        <activity android:name=".view.activity.RecommendedUpdateActivity" />
+
     </application>
 
 </manifest>

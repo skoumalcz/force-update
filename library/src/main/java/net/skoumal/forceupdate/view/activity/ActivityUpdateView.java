@@ -6,9 +6,6 @@ import android.content.Intent;
 import net.skoumal.forceupdate.UpdateView;
 import net.skoumal.forceupdate.Version;
 
-/**
- * Created by gingo on 1.10.2016.
- */
 public class ActivityUpdateView implements UpdateView {
 
     public static final String CURRENT_VERSION_EXTRA = "current_version";

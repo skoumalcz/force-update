@@ -1,6 +1,7 @@
 package net.skoumal.forceupdate;
 
 import android.app.Activity;
+import android.os.Bundle;
 
 import java.util.List;
 

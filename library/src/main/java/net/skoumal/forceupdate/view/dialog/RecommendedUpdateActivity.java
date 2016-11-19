@@ -1,4 +1,4 @@
-package net.skoumal.forceupdate.view.activity;
+package net.skoumal.forceupdate.view.dialog;
 
 import android.os.Bundle;
 
