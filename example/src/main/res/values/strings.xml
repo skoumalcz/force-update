@@ -1,4 +1,14 @@
 <resources>
     <string name="app_name">ForceUpdate</string>
+    <string name="restart_app_button">Restart App</string>
+    <string name="current_version">Current Version</string>
+    <string name="current_version_description">By default is parsed from APK version. You can change it, but you shouldn't need too.</string>
+    <string name="value">Value: %1$.0d</string>
+    <string name="min_allowed_version">Min Allowed Version</string>
+    <string name="min_allowed_version_description">When this version is lower than Current Version update will be forced after restart.</string>
+    <string name="excluded_version">Excluded Versions</string>
+    <string name="excluded_version_description">When one of Excluded Version matches with Current Version update will be forced.</string>
     <string name="forced_version_information">Your version is %1$s, please update to %2$s to be able using this app again.</string>
+    <string name="recommended_version">Recommended Version</string>
+    <string name="recommended_version_description">When this version is lower than Current Version update will be offered after restart.</string>
 </resources>

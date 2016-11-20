@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="net.skoumal.forceupdate"
+    android:versionCode="000100"
+    android:versionName="0.1.0">
+
+</manifest>

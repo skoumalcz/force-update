@@ -23,8 +23,6 @@ public class VersionResult {
         payloadList.add(gPayload);
     }
 
-
-
     public VersionResult(String gErrorMessage, Exception gErrorException) {
         errorMessage = gErrorMessage;
         errorException = gErrorException;
@@ -37,11 +35,19 @@ public class VersionResult {
     }
 
     public Version getVersion() {
-        return versionList.get(0);
+        if(isError) {
+            return null;
+        } else {
+            return versionList.get(0);
+        }
     }
 
     public String getPayload() {
-        return payloadList.get(0);
+        if(isError) {
+            return null;
+        } else {
+            return payloadList.get(0);
+        }
     }
 
     public List<Version> getVersionList() {

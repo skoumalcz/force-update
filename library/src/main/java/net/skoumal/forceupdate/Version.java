@@ -18,7 +18,7 @@ public class Version implements Comparable<Version>, Parcelable {
     public Version(String gVersionString) {
 
         if(TextUtils.isEmpty(gVersionString) || !Character.isDigit(gVersionString.charAt(0))) {
-            throw new RuntimeException("Accepted are only numbers with dots followed by anything. Examples of valid version strings are '0.1.2', '0.1.2-beta' or '0.1.2.3'.");
+            throw new RuntimeException("Invalid version format \"" + gVersionString + "\". Accepted are only numbers with dots followed by anything. Examples of valid version strings are '0.1.2', '0.1.2-beta' or '0.1.2.3'.");
         }
 
         List<Integer> versionParts = new LinkedList<Integer>();

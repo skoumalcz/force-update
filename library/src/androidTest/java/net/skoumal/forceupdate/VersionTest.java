@@ -39,6 +39,7 @@ public class VersionTest {
         assertEquals(33, v.getVersionParts()[1]);
         assertEquals(5, v.getVersionParts()[2]);
         assertEquals(4, v.getVersionParts()[3]);
+        assertEquals(4, v.getVersionParts().length);
     }
 
     @Test
@@ -72,9 +73,6 @@ public class VersionTest {
             // desired behaviour
         }
     }
-
-
-
 
     @Test
     public void versionPartsInit() throws Exception {
