@@ -1,0 +1,8 @@
+{
+  "another_attribute": {
+    "foo": 33
+  },
+  "my_great_version" : "3.2.1",
+  "bar": "U bílého vola",
+  "see-my-payload" : "cool-payload"
+}

@@ -3,6 +3,7 @@ package net.skoumal.forceupdate.provider;
 import android.app.Application;
 import android.support.test.InstrumentationRegistry;
 
+import net.skoumal.forceupdate.OfflineHelper;
 import net.skoumal.forceupdate.Version;
 import net.skoumal.forceupdate.VersionResult;
 
@@ -24,15 +25,15 @@ public class ApkVersionProviderTest {
 
         VersionResult result = provider.getVersion();
 
-        // TODO [1] avoid failing when offline
+        if(!OfflineHelper.ignoreOfflineErrors()) {
+            assertFalse(result.isError());
+            assertNotNull(result);
+            assertNotNull(result.getVersion());
+            assertNull(result.getErrorMessage());
+            assertNull(result.getErrorException());
 
-        assertFalse(result.isError());
-        assertNotNull(result);
-        assertNotNull(result.getVersion());
-        assertNull(result.getErrorMessage());
-        assertNull(result.getErrorException());
-
-        assertEquals(result.getVersion().toString(), new Version("0.1.0").toString());
+            assertEquals(result.getVersion().toString(), new Version("0.1.0").toString());
+        }
 
     }
 }

@@ -35,7 +35,7 @@ public class VersionResult {
     }
 
     public Version getVersion() {
-        if(isError) {
+        if(isError || versionList.size() < 1) {
             return null;
         } else {
             return versionList.get(0);
@@ -43,7 +43,7 @@ public class VersionResult {
     }
 
     public String getPayload() {
-        if(isError) {
+        if(isError || payloadList.size() < 1) {
             return null;
         } else {
             return payloadList.get(0);

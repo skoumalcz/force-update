@@ -1,1 +1,1 @@
-include ':library', ':example'
+include ':force-update', ':example'

@@ -3,9 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ForceUpdate.iml" filepath="$PROJECT_DIR$/ForceUpdate.iml" />
-      <module fileurl="file://$PROJECT_DIR$/library/app.iml" filepath="$PROJECT_DIR$/library/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/example/example.iml" filepath="$PROJECT_DIR$/example/example.iml" />
-      <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
+      <module fileurl="file://$PROJECT_DIR$/force-update/force-update.iml" filepath="$PROJECT_DIR$/force-update/force-update.iml" />
     </modules>
   </component>
 </project>

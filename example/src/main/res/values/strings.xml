@@ -2,7 +2,7 @@
     <string name="app_name">ForceUpdate</string>
     <string name="restart_app_button">Restart App</string>
     <string name="current_version">Current Version</string>
-    <string name="current_version_description">By default is parsed from APK version. You can change it, but you shouldn't need too.</string>
+    <string name="current_version_description">By default is parsed from APK version. You can change it, but you shouldn\'t need too.</string>
     <string name="value">Value: %1$.0d</string>
     <string name="min_allowed_version">Min Allowed Version</string>
     <string name="min_allowed_version_description">When this version is lower than Current Version update will be forced after restart.</string>
