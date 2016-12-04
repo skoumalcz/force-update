@@ -43,7 +43,6 @@ public class Http {
 
                 return response.toString();
             } else {
-                // simply send empty result
                 throw new IOException("HTTP status code " + status + " returned.");
             }
 
@@ -52,12 +51,6 @@ public class Http {
                 urlConnection.disconnect();
             }
         }
-    }
-
-    public static String getGooglePlayUrl(Context gContext) {
-        String packageName = gContext.getApplicationContext().getPackageName();
-
-        return "https://play.google.com/store/apps/details?id=" + packageName;
     }
 
 }
