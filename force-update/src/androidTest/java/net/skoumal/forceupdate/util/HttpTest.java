@@ -50,6 +50,7 @@ public class HttpTest {
             Http.loadString(new URL("http://www.skoumal.net/B4aeRRq23XOCTwRBTrnv"));
             fail("Should throw IOException.");
         } catch (IOException e) {
+            // TODO [1] check IOException type
             // great!
         }
     }

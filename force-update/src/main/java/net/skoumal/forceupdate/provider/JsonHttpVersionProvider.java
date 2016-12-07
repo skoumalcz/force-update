@@ -21,11 +21,11 @@ public class JsonHttpVersionProvider extends AbstractHttpVersionProvider {
         super(gUrl);
     }
 
-    public JsonHttpVersionProvider(String gUrl, String gVersionAttribute, String gDescriptionAttribute) {
+    public JsonHttpVersionProvider(String gUrl, String gVersionAttribute, String gPayloadAttribute) {
         super(gUrl);
 
         versionAttribute = gVersionAttribute;
-        payloadAttribute = gDescriptionAttribute;
+        payloadAttribute = gPayloadAttribute;
     }
 
     @Override

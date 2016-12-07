@@ -33,6 +33,7 @@ public class Http {
             int status = urlConnection.getResponseCode();
             if(status >= 200 && status < 300) {
 
+                //TODO [1] fix this to not add new line sign to last line
                 InputStream inputStream = urlConnection.getInputStream();
                 BufferedReader responseReader = new BufferedReader(new InputStreamReader(inputStream));
                 StringBuilder response = new StringBuilder();

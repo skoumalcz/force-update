@@ -1,9 +1,6 @@
 package net.skoumal.forceupdate.provider;
 
-import net.skoumal.forceupdate.Version;
 import net.skoumal.forceupdate.VersionResult;
-
-import java.util.List;
 
 /**
  * Created by gingo on 6.10.2016.
