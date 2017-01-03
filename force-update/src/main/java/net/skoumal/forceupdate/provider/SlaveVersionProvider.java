@@ -20,7 +20,7 @@ public class SlaveVersionProvider implements VersionProvider {
     }
 
     @Override
-    public VersionResult getVersion() {
+    public VersionResult getVersionResult() {
         //TODO [1] make fetchMinAllowedVersion, fetchRecommendedVersion, fetchForcedVersion and return result here
         masterProvider.fetchVersions(); // TODO [1] return result?
 

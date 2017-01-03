@@ -43,5 +43,4 @@ public abstract class MasterVersionProvider {
 
     protected abstract void fetchAndPutVersions();
 
-
 }

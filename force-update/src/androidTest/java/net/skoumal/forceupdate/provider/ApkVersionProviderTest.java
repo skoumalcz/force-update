@@ -23,7 +23,7 @@ public class ApkVersionProviderTest {
     public void loadVersion() throws Exception {
         ApkVersionProvider provider = new ApkVersionProvider((Application)InstrumentationRegistry.getTargetContext().getApplicationContext());
 
-        VersionResult result = provider.getVersion();
+        VersionResult result = provider.getVersionResult();
 
         if(!OfflineHelper.ignoreOfflineErrors()) {
             assertFalse(result.isError());

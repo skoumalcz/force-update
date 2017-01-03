@@ -30,7 +30,7 @@ public class ApkVersionProvider implements VersionProvider {
     }
 
     @Override
-    public VersionResult getVersion() {
+    public VersionResult getVersionResult() {
         return versionResult;
     }
 }

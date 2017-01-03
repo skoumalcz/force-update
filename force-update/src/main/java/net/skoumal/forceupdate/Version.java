@@ -30,7 +30,7 @@ public class Version implements Comparable<Version>, Parcelable {
                 break;
             }
 
-            if(TextUtils.isDigitsOnly(part)) {
+            if(isDigit(part)) {
                 versionParts.add(Integer.valueOf(part));
             } else {
                 int lastNumberIndex = -1;
@@ -49,14 +49,44 @@ public class Version implements Comparable<Version>, Parcelable {
         }
 
         // convert list of Integers to array of priminive ints
-        version = new int [versionParts.size()];
+        int [] versionPartsArray = new int [versionParts.size()];
         for(int i = 0; i < versionParts.size(); i++) {
-            version[i] = versionParts.get(i);
+            versionPartsArray[i] = versionParts.get(i);
         }
+
+        init(versionPartsArray);
     }
 
     public Version(int [] gVersionParts) {
+        init(gVersionParts.clone());
+    }
+
+    private void init(int[] gVersionParts) {
+        for(int part : gVersionParts) {
+            if(part < 0) {
+                throw new RuntimeException("Only positive numbers are allowed, you provided " + part + " as one part of version.");
+            }
+        }
+
         version = gVersionParts;
+    }
+
+    private static boolean isDigit(CharSequence str) {
+        final int len = str.length();
+
+        if(len > 0) {
+            char firstChar = str.charAt(0);
+            if(!Character.isDigit(firstChar) && firstChar != '-') {
+                return false;
+            }
+        }
+
+        for (int i = 1; i < len; i++) {
+            if (!Character.isDigit(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -113,7 +143,7 @@ public class Version implements Comparable<Version>, Parcelable {
     }
 
     public int [] getVersionParts() {
-        return version;
+        return version.clone();
     }
 
     protected Version(Parcel in) {

@@ -54,6 +54,7 @@
                     android:text="@string/value"/>
 
                 <Button
+                    android:id="@+id/min_allowed_version_minus_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
@@ -62,6 +63,7 @@
                     tools:ignore="HardcodedText" />
 
                 <Button
+                    android:id="@+id/min_allowed_version_plus_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="+"
@@ -83,13 +85,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <TextView
-                    android:id="@+id/excluded_versions_value"
+                    android:id="@+id/excluded_version_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:text="@string/value"/>
 
                 <Button
+                    android:id="@+id/excluded_version_minus_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
@@ -98,6 +101,7 @@
                     tools:ignore="HardcodedText" />
 
                 <Button
+                    android:id="@+id/excluded_version_plus_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="+"
@@ -126,6 +130,7 @@
                     android:text="@string/value"/>
 
                 <Button
+                    android:id="@+id/recommended_version_minus_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
@@ -134,6 +139,7 @@
                     tools:ignore="HardcodedText" />
 
                 <Button
+                    android:id="@+id/recommended_version_plus_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="+"
@@ -151,6 +157,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_margin="5dp"
-        android:text="@string/restart_app_button"/>
+        android:text="@string/restart_app_button" />
 
 </RelativeLayout>

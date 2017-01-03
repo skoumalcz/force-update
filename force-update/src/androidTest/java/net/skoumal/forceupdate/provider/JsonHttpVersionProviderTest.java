@@ -25,7 +25,7 @@ public class JsonHttpVersionProviderTest {
     public void loadVersionDefaultAttributes() throws Exception {
         JsonHttpVersionProvider provider = new JsonHttpVersionProvider("https://raw.githubusercontent.com/skoumalcz/force-update/master/force-update/src/androidTest/java/net/skoumal/forceupdate/provider/JsonHttpVersionProviderTest.DefaultAttributes.json");
 
-        VersionResult result = provider.getVersion();
+        VersionResult result = provider.getVersionResult();
 
         if(!OfflineHelper.ignoreOfflineErrors()) {
             assertFalse(result.isError());
@@ -48,7 +48,7 @@ public class JsonHttpVersionProviderTest {
                 "my_great_version",
                 "see-my-payload");
 
-        VersionResult result = provider.getVersion();
+        VersionResult result = provider.getVersionResult();
 
         if(!OfflineHelper.ignoreOfflineErrors()) {
             assertFalse(result.isError());
@@ -73,7 +73,7 @@ public class JsonHttpVersionProviderTest {
         TestButler.setWifiState(false);
 
         try {
-            VersionResult result = provider.getVersion();
+            VersionResult result = provider.getVersionResult();
 
             assertTrue(result.isError());
             assertNotNull(result);

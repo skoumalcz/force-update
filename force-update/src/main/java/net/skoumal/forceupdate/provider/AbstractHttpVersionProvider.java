@@ -29,7 +29,7 @@ public abstract class AbstractHttpVersionProvider implements VersionProvider {
     }
 
     @Override
-    public VersionResult getVersion() {
+    public VersionResult getVersionResult() {
 
         try {
             String stringResponse = Http.loadString(url);

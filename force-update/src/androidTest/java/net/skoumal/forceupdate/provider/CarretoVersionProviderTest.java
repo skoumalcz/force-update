@@ -1,6 +1,5 @@
 package net.skoumal.forceupdate.provider;
 
-import android.annotation.TargetApi;
 import android.support.test.filters.SdkSuppress;
 
 import com.linkedin.android.testbutler.TestButler;
@@ -26,7 +25,7 @@ public class CarretoVersionProviderTest {
     public void loadVersion() throws Exception {
         CarretoVersionProvider provider = new CarretoVersionProvider("com.vocabularyminer.android");
 
-        VersionResult result = provider.getVersion();
+        VersionResult result = provider.getVersionResult();
 
         if(!OfflineHelper.ignoreOfflineErrors()) {
             assertFalse(result.isError());
@@ -49,7 +48,7 @@ public class CarretoVersionProviderTest {
         TestButler.setWifiState(false);
 
         try {
-            VersionResult result = provider.getVersion();
+            VersionResult result = provider.getVersionResult();
 
             assertTrue(result.isError());
             assertNotNull(result);

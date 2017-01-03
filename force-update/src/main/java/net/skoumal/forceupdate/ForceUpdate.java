@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import net.skoumal.forceupdate.provider.ApkVersionProvider;
 import net.skoumal.forceupdate.provider.CarretoVersionProvider;
@@ -122,7 +123,6 @@ public class ForceUpdate {
     }
 
     public void init() {
-        checkForUpdate();
 
         application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override
@@ -194,27 +194,18 @@ public class ForceUpdate {
 
             String lastMinAllowedVersionPayload = sharedPreferences.getString(SHARED_PREFERENCES_LAST_MIN_ALLOWED_VERSION_PAYLOAD, null);
 
-            viewShown = showViewIfNeeded(forcedUpdateView, currentVersionProvider.getVersion().getVersion(), lastMinAllowedVersion, lastMinAllowedVersionPayload);
+            viewShown = showViewIfNeeded(forcedUpdateView, currentVersionProvider.getVersionResult().getVersion(), lastMinAllowedVersion, lastMinAllowedVersionPayload);
         }
 
         if(!viewShown) {
             Set<String> lastExcludedVersionStrSet = sharedPreferences.getStringSet(SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS, null);
-            List<Version> lastExcludedVersionList;
             if(lastExcludedVersionStrSet != null) {
-                lastExcludedVersionList = new ArrayList<>(lastExcludedVersionStrSet.size());
-                for (String s : lastExcludedVersionStrSet) {
-                    lastExcludedVersionList.add(new Version(s));
-                }
+                List<Version> lastExcludedVersionList = Versions.toVersionList(lastExcludedVersionStrSet);
 
-                Set<String> lastExcludedPayloadSet = sharedPreferences.getStringSet(SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS_PAYLOAD, null);
-                List<String> lastExcludedPayloadList;
-                if(lastExcludedPayloadSet == null) {
-                    lastExcludedPayloadList = new ArrayList<>(0);
-                } else {
-                    lastExcludedPayloadList = new ArrayList<>(lastExcludedPayloadSet);
-                }
+                Set<String> lastExcludedPayloadSet = sharedPreferences.getStringSet(SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS_PAYLOAD, new HashSet<String>(0));
+                List<String> lastExcludedPayloadList = new ArrayList<>(lastExcludedPayloadSet);
 
-                showViewIfNeeded(forcedUpdateView, currentVersionProvider.getVersion().getVersion(), lastExcludedVersionList, lastExcludedPayloadList);
+                showViewIfNeeded(forcedUpdateView, currentVersionProvider.getVersionResult().getVersion(), lastExcludedVersionList, lastExcludedPayloadList);
             }
         }
     }
@@ -235,7 +226,7 @@ public class ForceUpdate {
 
                 sharedPreferences.edit().putBoolean(SHARED_PREFERENCES_REQUEST_INTERRUPTED, true).apply();
 
-                Version currentVersion = currentVersionProvider.getVersion().getVersion();
+                Version currentVersion = currentVersionProvider.getVersionResult().getVersion();
 
                 boolean updateAvailable = checkVersion(minAllowedVersionProvider,
                         minAllowedVersionInterval,
@@ -298,13 +289,13 @@ public class ForceUpdate {
         if(gVersionProvider != null &&
                 lastRequest + (gVersionInterval * 1000) < System.currentTimeMillis()) {
 
-            VersionResult result = gVersionProvider.getVersion();
+            VersionResult result = gVersionProvider.getVersionResult();
 
             if(!result.isError()) {
 
                 sharedPreferences.edit().putLong(gSharedPreferencesLastRequestKey, System.currentTimeMillis()).apply();
 
-                if(result.getVersionList().size() < 2) {
+                if(!TextUtils.equals(gSharedPreferencesLastVersionKey, SHARED_PREFERENCES_LAST_EXCLUDED_VERSIONS)) {
                     Version version = result.getVersion();
                     String payload = result.getPayload();
 
@@ -445,7 +436,6 @@ public class ForceUpdate {
 
             return this;
         }
-
 
         public Builder forcedUpdateView(UpdateView gUpdateView) {
             forcedVersionView = gUpdateView;

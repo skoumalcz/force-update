@@ -67,6 +67,13 @@ public class VersionTest {
         }
 
         try {
+            new Version("4.5.-1");
+            fail("Should throw exception.");
+        } catch (RuntimeException e) {
+            // desired behaviour
+        }
+
+        try {
             new Version("a.b.c");
             fail("Should throw exception.");
         } catch (RuntimeException e) {
@@ -81,6 +88,23 @@ public class VersionTest {
         assertEquals(3, v.getVersionParts()[0]);
         assertEquals(4, v.getVersionParts()[1]);
         assertEquals(1, v.getVersionParts()[2]);
+    }
+
+    @Test
+    public void invalidVersionPartsInit() throws Exception {
+        try {
+            new Version(new int [] {3, 4, -1});
+            fail("Should throw exception.");
+        } catch (RuntimeException e) {
+            // desired behaviour
+        }
+
+        try {
+            new Version(new int [] {-3, 4, 0});
+            fail("Should throw exception.");
+        } catch (RuntimeException e) {
+            // desired behaviour
+        }
     }
 
     @Test
