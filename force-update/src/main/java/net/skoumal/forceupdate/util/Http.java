@@ -38,8 +38,14 @@ public class Http {
                 BufferedReader responseReader = new BufferedReader(new InputStreamReader(inputStream));
                 StringBuilder response = new StringBuilder();
                 String line;
+                boolean firstLine = true;
                 while ((line = responseReader.readLine()) != null) {
-                    response.append(line).append('\n');
+                    if(firstLine) {
+                        firstLine = false;
+                    } else {
+                        response.append('\n');
+                    }
+                    response.append(line);
                 }
 
                 return response.toString();

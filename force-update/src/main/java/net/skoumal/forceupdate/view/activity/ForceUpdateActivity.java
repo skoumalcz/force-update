@@ -18,9 +18,14 @@ public class ForceUpdateActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        onCreate(savedInstanceState, R.style.NoActionBarTheme);
+
+    }
+
+    public void onCreate(Bundle savedInstanceState, int gTheme) {
         super.onCreate(savedInstanceState);
 
-        setTheme(R.style.NoActionBarTheme);
+        setTheme(gTheme);
 
         setContentView(R.layout.force_update_activity);
 
@@ -30,8 +35,8 @@ public class ForceUpdateActivity extends Activity {
                 openGooglePlay();
             }
         });
-
     }
+
 
     public void openGooglePlay() {
         GooglePlay.openAppDetail(this);

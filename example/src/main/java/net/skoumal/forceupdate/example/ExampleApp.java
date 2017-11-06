@@ -9,9 +9,12 @@ import net.skoumal.forceupdate.UpdateView;
 import net.skoumal.forceupdate.Version;
 import net.skoumal.forceupdate.VersionProvider;
 import net.skoumal.forceupdate.example.activites.CustomForceUpdateActivity;
+import net.skoumal.forceupdate.example.activites.ResetVersionsForceUpdateActivity;
 import net.skoumal.forceupdate.example.provider.SharedPreferencesVersionProvider;
 import net.skoumal.forceupdate.provider.ApkVersionProvider;
 import net.skoumal.forceupdate.util.Versions;
+import net.skoumal.forceupdate.view.activity.ActivityUpdateView;
+import net.skoumal.forceupdate.view.activity.RecommendedUpdateActivity;
 
 /**
  * Created by Tadeas on 27.09.2016.
@@ -52,7 +55,12 @@ public class ExampleApp extends Application {
                 .currentVersionProvider(currentVersionProvider)
                 .minAllowedVersionProvider(minAllowedVersionProvider)
                 .recommendedVersionProvider(recommendedVersionProvider)
-                .excludedVersionListProvider(excludedVersionProvider);
+                .excludedVersionListProvider(excludedVersionProvider)
+                .minAllowedVersionCheckMinInterval(60)
+                .recommendedVersionCheckMinInterval(60)
+                .excludedVersionListCheckMinInterval(60)
+                .forcedUpdateView(new ActivityUpdateView(ResetVersionsForceUpdateActivity.class))
+                .recommendedUpdateView(new ActivityUpdateView(RecommendedUpdateActivity.class));
 
         if (SHOW_CUSTOM_FORCED_VIEW) {
             //here you can show your custom activity or just exclude forcedUpdateView function to use default activity

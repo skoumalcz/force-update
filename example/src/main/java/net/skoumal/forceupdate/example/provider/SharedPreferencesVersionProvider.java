@@ -15,12 +15,14 @@ public class SharedPreferencesVersionProvider implements VersionProvider {
     private Version version;
     private SharedPreferences sharedPreferences;
     private String sharedPreferencesKey;
+    private Version defaultVersion;
 
     public SharedPreferencesVersionProvider(SharedPreferences gSharedPreferences,
                                             String gKey,
                                             Version gDefaultVersion) {
         sharedPreferences = gSharedPreferences;
         sharedPreferencesKey = gKey;
+        defaultVersion = gDefaultVersion;
 
         String versionStr = sharedPreferences.getString(sharedPreferencesKey, null);
         if(versionStr == null) {
@@ -53,6 +55,11 @@ public class SharedPreferencesVersionProvider implements VersionProvider {
         version = new Version(versionParts);
 
         saveVersion();
+    }
+
+    public void resetVersion() {
+        version = defaultVersion;
+        sharedPreferences.edit().remove(sharedPreferencesKey).apply();
     }
 
     private void saveVersion() {

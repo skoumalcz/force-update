@@ -40,8 +40,8 @@ public class HttpTest {
 
         assertFalse(TextUtils.isEmpty(result));
         assertTrue(result.contains("Hello!"));
-        assertTrue(result.contains("Bye..."));
-        assertEquals(result, "Hello!\n\nBye...");
+        assertTrue(result.contains("Bye ..."));
+        assertEquals(result, "Hello!\n\nBye ...");
     }
 
     @Test

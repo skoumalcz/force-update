@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.jakewharton.processphoenix.ProcessPhoenix;
+
 import net.skoumal.forceupdate.Version;
 import net.skoumal.forceupdate.example.ExampleApp;
 import net.skoumal.forceupdate.example.R;
@@ -19,6 +21,13 @@ public class MainActivity extends AppCompatActivity {
         showVersions();
 
         initPlusMinusButtonsListener();
+
+        findViewById(R.id.restart_app_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ProcessPhoenix.triggerRebirth(MainActivity.this);
+            }
+        });
     }
 
     private void initPlusMinusButtonsListener() {
