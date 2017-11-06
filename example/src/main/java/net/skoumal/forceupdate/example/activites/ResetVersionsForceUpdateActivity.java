@@ -21,6 +21,7 @@ public class ResetVersionsForceUpdateActivity extends ForceUpdateActivity {
         findViewById(net.skoumal.forceupdate.R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ExampleApp.getInstance().getForceUpdate().clearCache();
                 ExampleApp.getInstance().getMinAllowedVersionProvider().resetVersion();
                 ExampleApp.getInstance().getExcludedVersionProvider().resetVersion();
                 ExampleApp.getInstance().getRecommendedVersionProvider().resetVersion();

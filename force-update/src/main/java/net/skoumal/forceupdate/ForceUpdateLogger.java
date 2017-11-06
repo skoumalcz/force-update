@@ -14,6 +14,10 @@ public class ForceUpdateLogger {
         return true;
     }
 
+    public static void w(String gMsg) {
+        w(gMsg, null);
+    }
+
     public static void w(String gMsg, Exception gException) {
         Log.w(TAG, gMsg, gException);
     }

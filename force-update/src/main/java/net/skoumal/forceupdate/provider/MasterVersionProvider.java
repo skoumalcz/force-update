@@ -41,6 +41,18 @@ public abstract class MasterVersionProvider {
         }
     }
 
+    public void setExcludedProvider(SlaveVersionProvider gExcludedProvider) {
+        excludedProvider = gExcludedProvider;
+    }
+
+    public void setMinAllowedProvider(SlaveVersionProvider gMinAllowedProvider) {
+        minAllowedProvider = gMinAllowedProvider;
+    }
+
+    public void setRecommendedProvider(SlaveVersionProvider gRecommendedProvider) {
+        recommendedProvider = gRecommendedProvider;
+    }
+
     protected abstract void fetchAndPutVersions();
 
 }

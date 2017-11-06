@@ -1,7 +1,7 @@
 ForceUpdate
 ============
 
-This library is currently in __concept phase__ feel free to stare it but do not try to use it :-)
+This library is currently in __concept phase__ feel free to give it a star, but do not try to use it :-)
 
 Force your users to update the app, or notify about non-critical updates.
 
@@ -18,6 +18,45 @@ or via Gradle:
 ```groovy
 compile 'net.skoumal.forceupdate:force-update:0.1.0'
 ```
+
+Recommended usage
+-----------------
+
+Only few lines of code are needed to notify your users about new updates and force them to update
+in edge cases, like critical error in app or backend incompatibility with old version of your app.
+
+Let's publish somewhere JSON in this format:
+
+```json
+    {
+        "min_allowed_version": "1.0.0",
+        "excluded_versions" : [ { "version" : "1.0.3" }, { "version" : "2.0.1" }]
+    }
+```
+
+Now add ForceUpdate initialization in your Application.onCreate():
+
+```java
+    new ForceUpdate.Builder()
+
+        // required - needs android.app.Application object
+        .application(this)
+
+        // load all data from our json file
+        .masterVersionProvider(new JsonHttpMasterVersionProvider("http://your.domain/path/to/above.json"))
+
+        // with exception for new version notifications
+        .recommendedVersionProvider(new GooglePlayVersionProvider())
+
+        // we are done
+        .buildAndInit();
+```
+
+Now all your users will be:
+
+- forced to update all installations with lower version than 1.0.0
+- forced to update installations with versions 1.0.3 and 2.0.1
+- notified about available update with every new version on Google Play
 
 Usage
 -----
@@ -70,6 +109,9 @@ To init ForceUpdate library use this simple builder in your Application:
 
         // defaults to predefined dialog
         .recommendedUpdateView(new RecommendedVersionView())
+
+        // one provider for all versions, overrides all VersionProviders
+        .masterVersionProvider(new MyMasterProvider());
 
         // alias for .build().init()
         .buildAndInit();

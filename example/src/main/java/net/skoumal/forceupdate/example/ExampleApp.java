@@ -31,6 +31,8 @@ public class ExampleApp extends Application {
     private SharedPreferencesVersionProvider recommendedVersionProvider;
     private SharedPreferencesVersionProvider excludedVersionProvider;
 
+    private ForceUpdate forceUpdate;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -53,27 +55,33 @@ public class ExampleApp extends Application {
 
             For this example purposes we use SharedPreferencesVersionProvider to fake min-allowed
             and recommended version. It is also great example of custom VersionProvider, but for
-            real world purposes see read-to-use VersionProviders in net.skoumal.forceupdate.provider
-            package, or implement your own.
-         */
-        // mock VersionProvider created only for this example purposes
-        Version apkVersion = currentVersionProvider.getVersionResult().getVersion();
-        minAllowedVersionProvider = new SharedPreferencesVersionProvider(preferences, Constants.SHARED_PREFERENCES_MIN_ALLOWED_VERSION, apkVersion);
-        recommendedVersionProvider = new SharedPreferencesVersionProvider(preferences, Constants.SHARED_PREFERENCES_RECOMMENDED_VERSION, apkVersion);
+            real world purposes see use one of ready-to-use VersionProviders, or implement your own:
 
-        int [] apkVersionParts = apkVersion.getVersionParts();
+            https://github.com/skoumalcz/force-update/blob/master/doc/VersionProviders.md
+         */
+        Version defaultVersion = currentVersionProvider.getVersionResult().getVersion(); // default version when SharedPreferences are empty
+        minAllowedVersionProvider = new SharedPreferencesVersionProvider(preferences, Constants.SHARED_PREFERENCES_MIN_ALLOWED_VERSION, defaultVersion);
+        recommendedVersionProvider = new SharedPreferencesVersionProvider(preferences, Constants.SHARED_PREFERENCES_RECOMMENDED_VERSION, defaultVersion);
+
+        /*
+            -- Excluded version --
+
+            To ban particular version we also use SharedPreferencesVersionProvider to fake it.
+         */
+        int [] apkVersionParts = currentVersionProvider.getVersionResult().getVersion().getVersionParts();
         Versions.decrementVersion(apkVersionParts);
         excludedVersionProvider = new SharedPreferencesVersionProvider(preferences, Constants.SHARED_PREFERENCES_EXCLUDED_VERSION, new Version(apkVersionParts));
 
         ForceUpdate.Builder builder = new ForceUpdate.Builder()
                 .application(this)
+                .debug(true)
                 .currentVersionProvider(currentVersionProvider)
                 .minAllowedVersionProvider(minAllowedVersionProvider)
                 .recommendedVersionProvider(recommendedVersionProvider)
                 .excludedVersionListProvider(excludedVersionProvider)
-                .minAllowedVersionCheckMinInterval(60)
-                .recommendedVersionCheckMinInterval(60)
-                .excludedVersionListCheckMinInterval(60)
+                .minAllowedVersionCheckMinInterval(1)
+                .recommendedVersionCheckMinInterval(1)
+                .excludedVersionListCheckMinInterval(1)
                 .forcedUpdateView(new ActivityUpdateView(ResetVersionsForceUpdateActivity.class))
                 .recommendedUpdateView(new ActivityUpdateView(RecommendedUpdateActivity.class));
 
@@ -88,7 +96,7 @@ public class ExampleApp extends Application {
             });
         }
 
-        builder.buildAndInit();
+        forceUpdate = builder.buildAndInit();
     }
 
     public static ExampleApp getInstance() {
@@ -109,5 +117,9 @@ public class ExampleApp extends Application {
 
     public SharedPreferencesVersionProvider getExcludedVersionProvider() {
         return excludedVersionProvider;
+    }
+
+    public ForceUpdate getForceUpdate() {
+        return forceUpdate;
     }
 }

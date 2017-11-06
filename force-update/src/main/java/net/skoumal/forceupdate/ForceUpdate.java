@@ -7,9 +7,12 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 
 import net.skoumal.forceupdate.provider.ApkVersionProvider;
 import net.skoumal.forceupdate.provider.CarretoVersionProvider;
+import net.skoumal.forceupdate.provider.MasterVersionProvider;
+import net.skoumal.forceupdate.provider.SlaveVersionProvider;
 import net.skoumal.forceupdate.util.Versions;
 import net.skoumal.forceupdate.view.activity.ActivityUpdateView;
 import net.skoumal.forceupdate.view.activity.ForceUpdateActivity;
@@ -73,6 +76,7 @@ public class ForceUpdate {
     private Activity resumedActivity;
 
     public ForceUpdate(Application gApplication,
+                       boolean gDebug,
                        VersionProvider gForcedVersionProvider, int gForcedVersionInterval,
                        VersionProvider gRecommendedVersionProvider, int gRecommendedVersionInterval,
                        VersionProvider gExcludedVersionListProvider, int gExcludedVersionListInterval,
@@ -91,7 +95,7 @@ public class ForceUpdate {
             throw new RuntimeException("Internet permission is necessary for version checks.");
         }
 
-        if(gForcedVersionInterval < 60 || gRecommendedVersionInterval < 60 || gExcludedVersionListInterval < 60) {
+        if(!gDebug && (gForcedVersionInterval < 60 || gRecommendedVersionInterval < 60 || gExcludedVersionListInterval < 60)) {
             throw new RuntimeException("Minimal fetch interval is 60s");
         }
 
@@ -267,7 +271,7 @@ public class ForceUpdate {
     }
 
     /**
-     * Check version in given version provider and compares it with given current version. Version
+     * Checks version in given version provider and compares it with given current version. Version
      * is checked only in case the defined interval is exceeded.
      * @param gVersionProvider provider of expected version
      * @param gVersionInterval how often we should check for expected version
@@ -347,19 +351,29 @@ public class ForceUpdate {
         }
     }
 
+    /**
+     * Mainly for testing and debug purposes. Avoid using it in production apps.
+     */
+    public void clearCache() {
+        sharedPreferences.edit().clear().apply();
+    }
+
     public static class Builder {
 
         private Application application;
 
         private VersionProvider minAllowedVersionProvider = null;
+        private MasterVersionProvider minAllowedMasterVersionProvider = null;
 
         private int minAllowedVersionInterval = 24 * 3600;
 
         private VersionProvider recommendedVersionProvider;
+        private MasterVersionProvider recommendedMasterVersionProvider = null;
 
         private int recommendedVersionInterval = 24 * 3600;
 
         private VersionProvider excludedVersionListProvider;
+        private MasterVersionProvider excludedMasterVersionProvider = null;
 
         private int excludedVersionListInterval = 24 * 3600;
 
@@ -370,6 +384,8 @@ public class ForceUpdate {
         private UpdateView recommendedVersionView = new ActivityUpdateView(RecommendedUpdateActivity.class);;
 
         private List<Class<?>> forceUpdateActivities = new ArrayList<>();
+
+        private boolean debug;
 
         public Builder() {
 
@@ -383,15 +399,39 @@ public class ForceUpdate {
             return this;
         }
 
+        public Builder debug(boolean gDebug) {
+            debug = gDebug;
+
+            if(!BuildConfig.DEBUG) {
+                ForceUpdateLogger.w("Debug mode enabled for production build!");
+            }
+
+            return this;
+        }
+
+        public Builder masterVersionProvider(MasterVersionProvider gMaster) {
+            minAllowedMasterVersionProvider = gMaster;
+            recommendedMasterVersionProvider = gMaster;
+            excludedMasterVersionProvider = gMaster;
+
+            return this;
+        }
+
         public Builder minAllowedVersionProvider(VersionProvider gProvider) {
             minAllowedVersionProvider = gProvider;
 
             return this;
         }
 
+        public Builder minAllowedVersionProvider(MasterVersionProvider gProvider) {
+            minAllowedMasterVersionProvider = gProvider;
+
+            return this;
+        }
+
         public Builder minAllowedVersionCheckMinInterval(int gSeconds) {
-            if(gSeconds < 60) {
-                throw new RuntimeException("Minimum check interval is 60s");
+            if(gSeconds < 60 && !debug) {
+                throw new RuntimeException("Minimum check interval is 60s, ForceUpdate.Builder.debug(BuildConfig.DEBUG) method prior this one to allow lower intervals.");
             }
 
             minAllowedVersionInterval = gSeconds;
@@ -405,9 +445,15 @@ public class ForceUpdate {
             return this;
         }
 
+        public Builder excludedVersionListProvider(MasterVersionProvider gProvider) {
+            excludedMasterVersionProvider = gProvider;
+
+            return this;
+        }
+
         public Builder excludedVersionListCheckMinInterval(int gSeconds) {
-            if(gSeconds < 60) {
-                throw new RuntimeException("Minimum check interval is 60s");
+            if(gSeconds < 60 && !debug) {
+                throw new RuntimeException("Minimum check interval is 60s, ForceUpdate.Builder.debug(BuildConfig.DEBUG) method prior this one to allow lower intervals.");
             }
 
             excludedVersionListInterval = gSeconds;
@@ -421,9 +467,15 @@ public class ForceUpdate {
             return this;
         }
 
+        public Builder recommendedVersionProvider(MasterVersionProvider gProvider) {
+            recommendedMasterVersionProvider = gProvider;
+
+            return this;
+        }
+
         public Builder recommendedVersionCheckMinInterval(int gSeconds) {
-            if(gSeconds < 60) {
-                throw new RuntimeException("Minimum check interval is 60s");
+            if(gSeconds < 60 && !debug) {
+                throw new RuntimeException("Minimum check interval is 60s, ForceUpdate.Builder.debug(BuildConfig.DEBUG) method prior this one to allow lower intervals.");
             }
 
             recommendedVersionInterval = gSeconds;
@@ -460,6 +512,24 @@ public class ForceUpdate {
                 throw new RuntimeException("Please call ForceUpdate.Builder#application(Application) method before build.");
             }
 
+            if(minAllowedVersionProvider == null && minAllowedMasterVersionProvider != null) {
+                SlaveVersionProvider slaveProvider = new SlaveVersionProvider(minAllowedMasterVersionProvider);
+                minAllowedVersionProvider = slaveProvider;
+                minAllowedMasterVersionProvider.setMinAllowedProvider(slaveProvider);
+            }
+
+            if(recommendedVersionProvider == null && recommendedMasterVersionProvider != null) {
+                SlaveVersionProvider slaveProvider = new SlaveVersionProvider(recommendedMasterVersionProvider);
+                recommendedVersionProvider = slaveProvider;
+                recommendedMasterVersionProvider.setRecommendedProvider(slaveProvider);
+            }
+
+            if(excludedVersionListProvider == null && excludedMasterVersionProvider != null) {
+                SlaveVersionProvider slaveProvider = new SlaveVersionProvider((excludedMasterVersionProvider));
+                excludedVersionListProvider = slaveProvider;
+                excludedMasterVersionProvider.setExcludedProvider(slaveProvider);
+            }
+
             if(currentVersionProvider == null) {
                 currentVersionProvider = new ApkVersionProvider(application);
             }
@@ -469,6 +539,7 @@ public class ForceUpdate {
             }
 
             return new ForceUpdate(application,
+                    debug,
                     minAllowedVersionProvider, minAllowedVersionInterval,
                     recommendedVersionProvider, recommendedVersionInterval,
                     excludedVersionListProvider, excludedVersionListInterval,
