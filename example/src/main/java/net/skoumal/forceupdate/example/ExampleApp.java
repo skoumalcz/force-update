@@ -40,9 +40,24 @@ public class ExampleApp extends Application {
         SharedPreferences preferences = getSharedPreferences(Constants.SHARED_PREFERENCES_VERSIONS,
                 MODE_PRIVATE);
 
-        currentVersionProvider = new ApkVersionProvider(this);
-        Version apkVersion = currentVersionProvider.getVersionResult().getVersion();
+        /*
+            -- Current version --
 
+            The simples way to provide current version is via ApkVersionProvider, but you can
+            implement your own provider of course.
+          */
+        currentVersionProvider = new ApkVersionProvider(this);
+
+        /*
+            -- Min allowed and recommended version --
+
+            For this example purposes we use SharedPreferencesVersionProvider to fake min-allowed
+            and recommended version. It is also great example of custom VersionProvider, but for
+            real world purposes see read-to-use VersionProviders in net.skoumal.forceupdate.provider
+            package, or implement your own.
+         */
+        // mock VersionProvider created only for this example purposes
+        Version apkVersion = currentVersionProvider.getVersionResult().getVersion();
         minAllowedVersionProvider = new SharedPreferencesVersionProvider(preferences, Constants.SHARED_PREFERENCES_MIN_ALLOWED_VERSION, apkVersion);
         recommendedVersionProvider = new SharedPreferencesVersionProvider(preferences, Constants.SHARED_PREFERENCES_RECOMMENDED_VERSION, apkVersion);
 
