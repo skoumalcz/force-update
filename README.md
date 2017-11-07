@@ -1,9 +1,9 @@
 ForceUpdate
 ============
 
-This library is currently in __concept phase__ feel free to give it a star, but do not try to use it :-)
-
 Force your users to update the app, or notify about non-critical updates.
+
+This library is currently in __concept phase__. Feel free to star it, but do not try to use it :-)
 
 
 Download
@@ -13,7 +13,7 @@ Download the latest JAR:
 
 [ ![Download](https://api.bintray.com/packages/skoumal/maven/force-update/images/download.svg) ](https://bintray.com/skoumal/maven/force-update/_latestVersion)
 
-or via Gradle:
+or include via Gradle:
 
 ```groovy
 compile 'net.skoumal.forceupdate:force-update:0.1.0'
@@ -22,10 +22,10 @@ compile 'net.skoumal.forceupdate:force-update:0.1.0'
 Recommended usage
 -----------------
 
-Only few lines of code are needed to notify your users about new updates and force them to update
-in edge cases, like critical error in app or backend incompatibility with old version of your app.
+Only few lines of code are needed to notify and force your users to update your application in serious
+cases, such as a critical error or backend incompatibility with an old version of your app.
 
-Let's publish somewhere JSON in this format:
+First, create a JSON file in this format and publish it:
 
 ```json
     {
@@ -34,7 +34,7 @@ Let's publish somewhere JSON in this format:
     }
 ```
 
-Now add ForceUpdate initialization in your Application.onCreate():
+Now add ForceUpdate initialization to your Application.onCreate():
 
 ```java
     new ForceUpdate.Builder()
@@ -42,7 +42,7 @@ Now add ForceUpdate initialization in your Application.onCreate():
         // required - needs android.app.Application object
         .application(this)
 
-        // load all data from our json file
+        // load all data from your json file
         .masterVersionProvider(new JsonHttpMasterVersionProvider("http://your.domain/path/to/above.json"))
 
         // with exception for new version notifications
@@ -54,7 +54,7 @@ Now add ForceUpdate initialization in your Application.onCreate():
 
 Now all your users will be:
 
-- forced to update all installations with lower version than 1.0.0
+- forced to update all installations with versions below 1.0.0
 - forced to update installations with versions 1.0.3 and 2.0.1
 - notified about available update with every new version on Google Play
 
@@ -62,10 +62,10 @@ Version providers
 -----------------
 
 You can load your version requirements from any place and any format. There is set of [ready-to-use
-version providers](blob/master/doc/VersionProviders.md) and you can write your own if you need
+version providers](blob/master/doc/VersionProviders.md), but you can also create your own if you need
 something special.
 
-By default every provider is asked once per 24 hours for its version.
+By default, every provider is polled once every 24 hours for its version.
 
 ```java
     new ForceUpdate.Builder()
@@ -76,19 +76,19 @@ By default every provider is asked once per 24 hours for its version.
         // custom provider for minimal required version
         .minAllowedVersionProvider(new MyCustomVersionProvider())
 
-        // ask min-allowed-version provider every 4 hours for version
+        // poll the min-allowed-version provider every 4 hours
         .minAllowedVersionCheckMinInterval(4 * 3600)
 
         // custom provider for recommended version provider
         .recommendedVersionProvider(new AnotherCustomVersionProvider())
 
-        // ask recommended-version provider every 6 hours for version
+        // poll the recommended-version provider every 6 hours
         .recommendedVersionCheckMinInterval(6 * 3600)
 
-        // custom provider of exluded version list
+        // custom provider for exluded version list
         .excludedVersionProvider(new MyExcludedVersionListProvider())
 
-        // ask excluded-version provider every 8 hours
+        // poll the excluded-version provider every 8 hours
         .excludedVersionCheckMinInterval(8 * 3600)
 
         // you can also load apk version your own way if needed
@@ -97,7 +97,7 @@ By default every provider is asked once per 24 hours for its version.
         .buildAndInit();
 ```
 
-Sometimes you need to load more data from one physycal source, like in our first example, where we
+Sometimes you need to load more data from one physical source, like in the first example where we
 load min-allowed and excluded versions from one JSON file:
 
 ```json
@@ -116,7 +116,7 @@ You can load all three versions from JSON file above
         // required - needs android.app.Application object
         .application(this)
 
-        // one provider for all versions, could be overwritten by methods above
+        // one provider for all versions, can be overwritten by methods above
         .masterVersionProvider(new JsonHttpMasterVersionProvider("http://your.domain/path/to/above.json"));
 
         .buildAndInit();
@@ -126,7 +126,7 @@ You can load all three versions from JSON file above
 View customization
 ------------------
 
-Simply define your own views for force-update Activity and/or for recommended-update Dialog:
+Simply define your own views for Force-Update Activity and/or for recommended-update Dialog:
 
 ```java
     new ForceUpdate.Builder()
@@ -162,8 +162,6 @@ Use your own activities:
 
 Or provide completely custom implementation of UpdateView interface:
 
-Use your own activities:
-
 ```java
     new ForceUpdate.Builder()
 
@@ -186,18 +184,18 @@ Usage
 This library was designed with full customisability in mind. Whole library is based on three simple
 terms:
 
-* **VersionProvider** - provides version from some source, for example from your APK, Google Play,
-your server, or any other third party service. You can choose one of existing VersionProviders, or
+* **VersionProvider** - provides version from a source, for example from your APK, Google Play,
+your server, or any other third party service. You can choose one of existing VersionProviders or
 create your own.
 
 * **UpdateView** - abstraction of the way how we notify user about new version available
-(recommended update) or about necessary update (forced update). Predefined Activities and dialogs
-available again.
+(recommended update) or about necessary update (forced update). Predefined Activities and dialogs are
+available as well.
 
-* **CheckInterval** - how often should we ask _VersionProvider_ for new data. The under-the-hood
-strategy is to ask with every _Activity.onResume()_ event if _MinInterval_ is already reached.
+* **CheckInterval** - how often should we poll _VersionProvider_ for new data. The under-the-hood
+strategy is to poll with every _Activity.onResume()_ event if _MinInterval_ is already reached.
 
-To init ForceUpdate library use this simple builder in your Application:
+Use the simple builder in your Application to init ForceUpdate:
 
 ```java
     new ForceUpdate.Builder()
@@ -242,9 +240,9 @@ To init ForceUpdate library use this simple builder in your Application:
 Extras
 ------
 
-Library is able to detect crash during last version check and hangs main thread during next app
-start to avoid any other code execution and allow successful version check. If there is new version
-available it fires notification automatically.
+ForceUpdate is able to detect crash during last version check and hangs main thread during next app
+start to avoid any other code execution and allow successful version check. If there is a new version
+available it automatically fires a notification.
 
 Contact
 =======
