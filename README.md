@@ -46,7 +46,7 @@ Now add ForceUpdate initialization in your Application.onCreate():
         .masterVersionProvider(new JsonHttpMasterVersionProvider("http://your.domain/path/to/above.json"))
 
         // with exception for new version notifications
-        .recommendedVersionProvider(new GooglePlayVersionProvider())
+        .recommendedVersionProvider(new CarretoGooglePlayVersionProvider())
 
         // we are done
         .buildAndInit();
@@ -98,7 +98,17 @@ By default every provider is asked once per 24 hours for its version.
 ```
 
 Sometimes you need to load more data from one physycal source, like in our first example, where we
-load min-allowed and excluded versions from one JSON file.
+load min-allowed and excluded versions from one JSON file:
+
+```json
+    {
+        "min_allowed_version": "1.0.0",
+        "excluded_versions" : [ { "version" : "1.0.3" }, { "version" : "2.0.1" }],
+        "recommended_version" : "3.0.3"
+    }
+```
+
+You can load all three versions from JSON file above
 
 ```java
     new ForceUpdate.Builder()
@@ -107,7 +117,7 @@ load min-allowed and excluded versions from one JSON file.
         .application(this)
 
         // one provider for all versions, could be overwritten by methods above
-        .masterVersionProvider(new MyMasterProvider());
+        .masterVersionProvider(new JsonHttpMasterVersionProvider("http://your.domain/path/to/above.json"));
 
         .buildAndInit();
 ```
@@ -202,7 +212,7 @@ To init ForceUpdate library use this simple builder in your Application:
         .minAllowedVersionCheckMinInterval(4 * 3600)
 
         // defaults to version from http://carreto.pt/tools/android-store-version/?package=<your package>
-        .recommendedVersionProvider(new GooglePlayVersionProvider())
+        .recommendedVersionProvider(new CarretoGooglePlayVersionProvider())
 
         // defaults to 24 hours
         .recommendedVersionCheckMinInterval(6 * 3600)

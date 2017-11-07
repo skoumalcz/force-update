@@ -23,7 +23,7 @@ public class CarretoVersionProviderTest {
 
     @Test
     public void loadVersion() throws Exception {
-        CarretoVersionProvider provider = new CarretoVersionProvider("com.vocabularyminer.android");
+        CarretoGooglePlayVersionProvider provider = new CarretoGooglePlayVersionProvider("com.vocabularyminer.android");
 
         VersionResult result = provider.getVersionResult();
 
@@ -42,7 +42,7 @@ public class CarretoVersionProviderTest {
     @Test
     @SdkSuppress(minSdkVersion=19)
     public void loadVersionOffline() throws Exception {
-        CarretoVersionProvider provider = new CarretoVersionProvider("com.vocabularyminer.android");
+        CarretoGooglePlayVersionProvider provider = new CarretoGooglePlayVersionProvider("com.vocabularyminer.android");
 
         TestButler.setGsmState(false);
         TestButler.setWifiState(false);

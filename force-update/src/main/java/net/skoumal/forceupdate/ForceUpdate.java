@@ -7,10 +7,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 
 import net.skoumal.forceupdate.provider.ApkVersionProvider;
-import net.skoumal.forceupdate.provider.CarretoVersionProvider;
+import net.skoumal.forceupdate.provider.CarretoGooglePlayVersionProvider;
 import net.skoumal.forceupdate.provider.MasterVersionProvider;
 import net.skoumal.forceupdate.provider.SlaveVersionProvider;
 import net.skoumal.forceupdate.util.Versions;
@@ -535,7 +534,7 @@ public class ForceUpdate {
             }
 
             if(recommendedVersionProvider == null) {
-                recommendedVersionProvider = new CarretoVersionProvider(application);
+                recommendedVersionProvider = new CarretoGooglePlayVersionProvider(application);
             }
 
             return new ForceUpdate(application,
