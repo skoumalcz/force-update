@@ -1,3 +1,8 @@
+EOL (DEPRECATED)
+===
+
+Use [Play Core library](https://developer.android.com/reference/com/google/android/play/core/appupdate/AppUpdateManager.html) to achieve same / better results.
+
 ForceUpdate
 ============
 
